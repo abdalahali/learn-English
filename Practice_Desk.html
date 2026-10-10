@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<!--
+====================================================================
+DIGITAL SIGNATURE
+File: Practice Desk.html
+Modified by: 3bdalah
+Timestamp: 2026-09-19
+Status: Verified & Authenticated
+====================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="3bdalah">
+<meta name="modified-by" content="3bdalah">
+<title>Practice Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Delius&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --paper: #ECEBE3;
+    --sheet: #FFFFFF;
+    --ink: #1B2430;
+    --ink-soft: #5B6472;
+    --green: #2F5233;
+    --green-soft: #E3EAE0;
+    --wine: #7A2E38;
+    --wine-soft: #F1E3E1;
+    --stone: #C9C2B4;
+    --stone-light: #E6E2D6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  /* Hide side scrollbar on PCs */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 60px;
+  }
+
+  .intro {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .intro h1 {
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .intro p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- switcher ---------- */
+  .switcher-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .switcher {
+    position: relative;
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--stone-light);
+    border-radius: 999px;
+  }
+
+  .switch-indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: 100px;
+    border-radius: 999px;
+    background: var(--green);
+    transition: left .4s cubic-bezier(.65,0,.35,1),
+                width .4s cubic-bezier(.65,0,.35,1),
+                background-color .4s ease;
+    z-index: 1;
+  }
+
+  .switch-btn {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    padding: 11px 22px;
+    border-radius: 999px;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color .3s ease;
+    white-space: nowrap;
+  }
+
+  .switch-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .switch-btn.active { color: #fff; }
+
+  /* ---------- panels ---------- */
+  .panels { position: relative; }
+
+  .panel {
+    background: var(--sheet);
+    border-radius: 14px;
+    padding: 30px 30px 26px;
+    box-shadow: 0 10px 28px rgba(27, 36, 48, 0.08);
+    transition: opacity .35s ease, transform .35s ease;
+  }
+
+  .panel.hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .writing-sheet { border-top: 4px solid var(--green); }
+  .vocab-sheet { border-top: 4px solid var(--wine); }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  .field { margin-bottom: 4px; }
+
+  #prompt-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--stone-light);
+    background: transparent;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: var(--ink);
+    padding: 4px 2px 8px;
+    outline: none;
+    min-height: 54px;
+    resize: none;
+    overflow: hidden;
+    display: block;
+    transition: border-color .25s ease;
+  }
+  #prompt-input:focus { border-color: var(--green); }
+  #prompt-input::placeholder { color: var(--ink-soft); opacity: 0.55; font-style: italic; }
+
+  .divider {
+    height: 1px;
+    background: var(--stone-light);
+    margin: 22px 0 20px;
+  }
+
+  .field-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .field-head label { margin-bottom: 0; }
+
+  .word-count {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    opacity: 0.75;
+  }
+
+  #writing-area,
+  #writing-area-mirror {
+    width: 100%;
+    min-height: 320px;
+    resize: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 1.08rem;
+    line-height: 1.85;
+    color: var(--ink);
+    padding: 2px;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  #writing-area-mirror {
+    position: absolute !important;
+    top: 0 !important;
+    left: -9999px !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+  }
+  #writing-area::-webkit-scrollbar,
+  #writing-area-mirror::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  #writing-area::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.55;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+    gap: 10px;
+  }
+
+  .actions.two { justify-content: space-between; }
+  .actions { flex-wrap: wrap; }
+  .actions .btn:first-child:not(:only-child) { margin-right: auto; }
+  @media (max-width: 560px) {
+    .actions .btn { padding: 10px 14px; font-size: 0.84rem; }
+  }
+
+  .btn {
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  .btn.ghost {
+    background: transparent;
+    border-color: var(--stone);
+    color: var(--ink-soft);
+  }
+  .btn.ghost:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+  .btn.solid {
+    background: var(--wine);
+    color: #fff;
+  }
+  .btn.solid:hover { background: #631f28; }
+
+  .btn.solid-green {
+    background: var(--green);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn.solid-green:hover { background: #233e26; }
+  .btn.solid-green svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .btn.solid-green.copied { background: #233e26; }
+
+  .actions-secondary {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--stone-light);
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn.danger-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    border-color: var(--wine-soft);
+    color: var(--wine);
+  }
+  .btn.danger-ghost:hover {
+    background: var(--wine-soft);
+    border-color: var(--wine);
+  }
+  .btn.danger-ghost svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ---------- custom modal (replaces native alert/confirm) ---------- */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(27, 36, 48, 0.45);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    z-index: 1000;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-box {
+    background: var(--sheet);
+    border-radius: 16px;
+    padding: 30px 28px 24px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(27, 36, 48, 0.28);
+    border-top: 4px solid var(--wine);
+    transform: translateY(12px) scale(0.97);
+    opacity: 0;
+    transition: transform .3s cubic-bezier(.2,.8,.3,1.2), opacity .25s ease;
+  }
+  .modal-overlay.open .modal-box {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .modal-title {
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    font-size: 1.28rem;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .modal-message {
+    font-size: 0.96rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .modal-actions .btn { min-width: 84px; text-align: center; }
+
+  @media (max-width: 480px) {
+    .modal-box { padding: 26px 20px 20px; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions .btn { width: 100%; }
+  }
+
+  @media (min-width: 860px) {
+    .modal-box { max-width: 440px; padding: 36px 34px 28px; border-radius: 18px; }
+    .modal-title { font-size: 1.45rem; }
+    .modal-message { font-size: 1.02rem; }
+  }
+
+  /* ---------- vocabulary table ---------- */
+  #vocab-export .export-head {
+    margin-bottom: 18px;
+  }
+
+  #vocab-export .export-head h2 {
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  .vocab-table { width: 100%; }
+
+  .vocab-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .row-num {
+    flex: 0 0 28px;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--wine);
+    opacity: 0.75;
+    text-align: right;
+    padding-right: 6px;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .vocab-row:not(.head-row) .row-num {
+    padding-top: 12px;
+  }
+  .row-num.head {
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--wine);
+    padding: 0 6px 10px 0;
+    border-bottom: 2px solid var(--wine);
+    opacity: 1;
+  }
+
+  .vocab-cell { flex: 1 1 0; }
+  .word-input { flex: 1 1 0; min-width: 0; }
+  .meaning-cell-wrap {
+    flex: 1.3 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .head-row .vocab-cell {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--wine);
+    padding: 0 10px 10px;
+    border-bottom: 2px solid var(--wine);
+  }
+  .head-row .vocab-cell:nth-child(2) { flex: 1 1 0; }
+  .head-row .vocab-cell:nth-child(3) { flex: 1.3 1 0; }
+
+  .vocab-row:not(.head-row) {
+    border-bottom: 1px solid var(--stone-light);
+  }
+
+  input.vocab-cell {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    color: var(--ink);
+    padding: 12px 10px;
+    font-size: 0.96rem;
+  }
+
+  input.word-input { font-weight: 600; }
+  input.vocab-cell::placeholder { color: var(--ink-soft); opacity: 0.45; }
+
+  .meaning-input-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .meaning-input-row input.meaning-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .example-toggle {
+    flex: 0 0 auto;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--stone);
+    color: var(--ink-soft);
+    background: transparent;
+    transition: all .2s ease;
+    user-select: none;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+  .example-toggle:hover {
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+  .example-toggle.active {
+    background: var(--wine);
+    color: #FFFFFF;
+    border-color: var(--wine);
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(122, 46, 56, 0.25);
+  }
+
+  .examples-wrap {
+    width: 100%;
+    display: block;
+    padding: 2px 4px 10px 10px;
+    box-sizing: border-box;
+  }
+
+  .example-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(122, 46, 56, 0.04);
+    border-radius: 6px;
+    padding: 7px 10px;
+    border-left: 2.5px solid var(--wine);
+  }
+
+  .example-bullet {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--wine);
+    font-weight: 700;
+    user-select: none;
+    flex-shrink: 0;
+    margin-top: -1px;
+  }
+
+  .examples-area {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Delius', 'Comic Sans MS', 'Segoe UI', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 0;
+    margin: 0;
+    resize: none;
+    overflow-y: hidden;
+    min-height: 22px;
+    scrollbar-width: none;
+  }
+  .examples-area::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 0.84rem;
+  }
+  .examples-area:focus,
+  .examples-area:focus-visible {
+    outline: none;
+  }
+
+  .row-delete {
+    flex: 0 0 26px;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity .2s ease, color .2s ease;
+  }
+  .vocab-row:not(.head-row) .row-delete {
+    margin-top: 10px;
+  }
+  .row-delete:hover { opacity: 1; color: var(--wine); }
+  .row-delete.head { visibility: hidden; }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 34px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    opacity: 0.6;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--wine);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 560px) {
+    .page { padding: 32px 16px 44px; }
+    .intro h1 { font-size: 1.9rem; }
+    .panel { padding: 22px 18px 20px; }
+    .vocab-row { gap: 6px; }
+    .row-num { flex-basis: 22px; font-size: 0.85rem; padding-right: 4px; }
+    .row-num.head { font-size: 0.76rem; padding-right: 4px; }
+    .vocab-row:not(.head-row) .row-num { padding-top: 10px; }
+    .vocab-row:not(.head-row) .row-delete { margin-top: 8px; }
+    .row-delete { flex-basis: 20px; }
+    input.vocab-cell { padding: 10px 6px; font-size: 0.88rem; }
+    .meaning-input-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .meaning-input-row input.meaning-input { width: 100%; }
+    .example-toggle {
+      border: none;
+      background: transparent;
+      padding: 2px 0 2px 1px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--wine);
+      opacity: 0.75;
+      margin-right: 0;
+    }
+    .example-toggle::before { content: '+ '; }
+    .example-toggle.active {
+      background: transparent;
+      color: var(--wine);
+      opacity: 1;
+      box-shadow: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .example-toggle.active::before { content: '– '; }
+    .examples-wrap { padding: 4px 4px 8px 1px; }
+    .examples-area { font-size: 0.82rem; }
+    .example-line { padding: 5px 8px; gap: 6px; }
+    .switch-btn { padding: 10px 16px; font-size: 0.88rem; }
+  }
+
+  /* Tablets and up: the 720px column feels small on wider screens, so the
+     desk scales up continuously with the window width instead of jumping
+     between a few fixed sizes — it stays proportionate on any monitor,
+     capped at 1400px so lines of text don't get uncomfortably long. */
+  @media (min-width: 860px) {
+    .page { max-width: min(92vw, 1400px); padding: 68px 32px 88px; }
+    .intro h1 { font-size: 3.1rem; }
+    .intro p { font-size: 1.12rem; }
+    .switcher { padding: 5px; gap: 5px; }
+    .switch-btn { padding: 13px 28px; font-size: 1.02rem; }
+    .switch-btn svg { width: 18px; height: 18px; }
+    .panel { padding: 42px 46px 36px; border-radius: 18px; }
+    #prompt-input { font-size: 1.28rem; min-height: 64px; }
+    #writing-area,
+    #writing-area-mirror { font-size: 1.18rem; line-height: 1.95; }
+    #writing-area { min-height: 440px; }
+    label { font-size: 0.9rem; }
+    .word-input { flex: 0 1 260px; }
+    .meaning-cell-wrap { flex: 1 1 0; }
+    .head-row .vocab-cell:nth-child(2) { flex: 0 1 260px; }
+    .head-row .vocab-cell:nth-child(3) { flex: 1 1 0; }
+    .row-num { flex-basis: 34px; font-size: 1.05rem; padding-right: 8px; }
+    .row-num.head { font-size: 0.88rem; padding-right: 8px; }
+    .vocab-row:not(.head-row) .row-num { padding-top: 15px; }
+    .vocab-row:not(.head-row) .row-delete { margin-top: 12px; }
+    input.vocab-cell { font-size: 1.04rem; padding: 15px 12px; }
+    .example-toggle { font-size: 0.82rem; padding: 4px 10px; }
+    .examples-wrap { padding: 2px 4px 12px 12px; }
+    .example-line { padding: 9px 12px; }
+    .examples-area { font-size: 0.94rem; }
+    .head-row .vocab-cell { font-size: 0.88rem; padding: 0 12px 13px; }
+    #vocab-export .export-head h2 { font-size: 1.75rem; }
+    .btn { font-size: 0.94rem; padding: 12px 22px; }
+    .footer-note { font-size: 0.88rem; margin-top: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="intro">
+    <h1>Practice Desk</h1>
+    <p>A quiet space to write freely and collect new words.</p>
+  </div>
+
+  <div class="switcher-wrap">
+    <div class="switcher" id="switcher">
+      <div class="switch-indicator" id="switch-indicator"></div>
+      <button class="switch-btn active" id="btn-writing" type="button" onclick="setMode('writing')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        <span>Writing</span>
+      </button>
+      <button class="switch-btn" id="btn-vocab" type="button" onclick="setMode('vocab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Vocabulary</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panels">
+
+    <!-- WRITING PANEL -->
+    <section class="panel writing-sheet" id="writing-panel">
+      <div class="field">
+        <label for="prompt-input">The question</label>
+        <textarea
+          id="prompt-input"
+          rows="2"
+          placeholder="What is the question?"
+          spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"
+          data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"
+          oninput="autoGrowQuestion()"></textarea>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="writing-area">Your writing</label>
+          <span class="word-count" id="word-count">0 words</span>
+        </div>
+        <textarea
+          id="writing-area"
+          placeholder="Start writing here. No red lines, no distractions — just focus on getting your sentences right."
+          spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"
+          data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"
+          oninput="updateWordCount(); autoGrow(this);"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost" type="button" onclick="clearWriting()">Clear</button>
+        <button class="btn solid-green" id="btn-copy-writing" type="button" onclick="copyWriting()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copy</span>
+        </button>
+        <button class="btn solid-green" id="btn-save-writing" type="button" onclick="downloadWritingPNG()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Save as image</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- VOCABULARY PANEL -->
+    <section class="panel vocab-sheet hidden" id="vocab-panel" style="display:none;">
+      <div id="vocab-export">
+        <div class="export-head">
+          <h2>Vocabulary list</h2>
+        </div>
+        <div class="vocab-table" id="vocab-table">
+          <div class="vocab-row head-row">
+            <div class="row-num head">#</div>
+            <div class="vocab-cell">Word</div>
+            <div class="vocab-cell">Meaning</div>
+            <div class="row-delete head"></div>
+          </div>
+          <!-- rows injected by JS -->
+        </div>
+      </div>
+      <div class="actions two">
+        <button class="btn ghost" type="button" onclick="addRow()">+ Add word</button>
+        <button class="btn solid" type="button" onclick="downloadPNG()">Save as PNG</button>
+      </div>
+      <div class="actions-secondary">
+        <button class="btn danger-ghost" type="button" onclick="confirmClearAllWords()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          <span>Clear all words</span>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="footer-note">My English Journey</div>
+
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-message">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-message" id="modal-message"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+
+<script>
+  /* ---------------- switcher ---------------- */
+  let crossfadeTimeout = null;
+
+  function positionIndicator(btn) {
+    if (!btn) return;
+    const indicator = document.getElementById('switch-indicator');
+    if (!indicator) return;
+    indicator.style.left = btn.offsetLeft + 'px';
+    indicator.style.width = btn.offsetWidth + 'px';
+  }
+
+  function recalculateAllExamplesHeight() {
+    document.querySelectorAll('#vocab-table .vocab-row:not(.head-row)').forEach(row => {
+      const exWrap = row.querySelector('.examples-wrap');
+      const exArea = row.querySelector('.examples-area');
+      if (exWrap && exWrap.style.display !== 'none' && exArea) {
+        exArea.style.height = 'auto';
+        exArea.style.height = Math.max(22, exArea.scrollHeight) + 'px';
+      }
+    });
+  }
+
+  function crossfade(mode) {
+    const showEl = document.getElementById(mode === 'writing' ? 'writing-panel' : 'vocab-panel');
+    const hideEl = document.getElementById(mode === 'writing' ? 'vocab-panel' : 'writing-panel');
+
+    if (!showEl || !hideEl) return;
+    if (!showEl.classList.contains('hidden')) return;
+
+    if (crossfadeTimeout) {
+      clearTimeout(crossfadeTimeout);
+      crossfadeTimeout = null;
+    }
+
+    hideEl.classList.add('hidden');
+    showEl.style.display = 'block';
+    requestAnimationFrame(() => {
+      showEl.classList.remove('hidden');
+      if (mode === 'vocab') {
+        recalculateAllExamplesHeight();
+      } else {
+        const area = document.getElementById('writing-area');
+        if (area) autoGrow(area);
+      }
+    });
+    crossfadeTimeout = setTimeout(() => {
+      if (hideEl.classList.contains('hidden')) {
+        hideEl.style.display = 'none';
+      }
+    }, 350);
+  }
+
+  function setMode(mode) {
+    const btnWriting = document.getElementById('btn-writing');
+    const btnVocab = document.getElementById('btn-vocab');
+    const indicator = document.getElementById('switch-indicator');
+
+    if (mode === 'writing') {
+      btnWriting.classList.add('active');
+      btnVocab.classList.remove('active');
+      positionIndicator(btnWriting);
+      if (indicator) indicator.style.background = 'var(--green)';
+    } else {
+      btnVocab.classList.add('active');
+      btnWriting.classList.remove('active');
+      positionIndicator(btnVocab);
+      if (indicator) indicator.style.background = 'var(--wine)';
+    }
+    crossfade(mode);
+    setTimeout(autoGrowQuestion, 0);
+    setTimeout(autoGrowQuestion, 350);
+    saveState();
+  }
+
+  window.addEventListener('load', () => positionIndicator(document.getElementById('btn-writing')));
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.switch-btn.active');
+    if (active) positionIndicator(active);
+    const writingArea = document.getElementById('writing-area');
+    if (writingArea) autoGrow(writingArea);
+    autoGrowQuestion();
+    recalculateAllExamplesHeight();
+  });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      const active = document.querySelector('.switch-btn.active');
+      if (active) positionIndicator(active);
+    });
+  }
+
+  /* ---------------- custom modal (replaces native alert/confirm) ---------------- */
+  let modalResolve = null;
+  let modalLastFocused = null;
+
+  function modalKeyHandler(e) {
+    if (e.key === 'Escape') {
+      closeModal(false);
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = Array.from(document.querySelectorAll('#modal-actions .btn'));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  function closeModal(value) {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.removeEventListener('keydown', modalKeyHandler);
+    const page = document.querySelector('.page');
+    if (page) page.inert = false;
+    if (modalLastFocused && typeof modalLastFocused.focus === 'function') {
+      modalLastFocused.focus();
+    }
+    modalLastFocused = null;
+    if (modalResolve) {
+      const resolve = modalResolve;
+      modalResolve = null;
+      resolve(value);
+    }
+  }
+
+  function showModal(title, message, buttons) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+      modalLastFocused = document.activeElement;
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+
+      const actions = document.getElementById('modal-actions');
+      actions.innerHTML = '';
+      let firstBtn = null;
+      buttons.forEach((def) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn ' + def.style;
+        b.textContent = def.label;
+        b.addEventListener('click', () => closeModal(def.value));
+        actions.appendChild(b);
+        if (!firstBtn) firstBtn = b;
+      });
+
+      const page = document.querySelector('.page');
+      if (page) page.inert = true;
+      document.getElementById('modal-overlay').classList.add('open');
+      document.addEventListener('keydown', modalKeyHandler);
+      if (firstBtn) firstBtn.focus();
+    });
+  }
+
+  function showAlert(message, title) {
+    return showModal(title || 'Heads up', message, [
+      { label: 'OK', value: true, style: 'solid' }
+    ]);
+  }
+
+  function showConfirm(message, title) {
+    return showModal(title || 'Please confirm', message, [
+      { label: 'Cancel', value: false, style: 'ghost' },
+      { label: 'Yes, continue', value: true, style: 'solid' }
+    ]);
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal(false);
+  });
+
+  /* ---------------- writing panel ---------------- */
+  function countWords(text) {
+    if (!text || !text.trim()) return 0;
+    const matches = text.match(/[\p{L}\p{N}]+(?:['’`´\-][\p{L}\p{N}]+)*/gu);
+    return matches ? matches.length : 0;
+  }
+
+  function updateWordCount() {
+    const text = document.getElementById('writing-area').value;
+    const count = countWords(text);
+    document.getElementById('word-count').textContent = count + (count === 1 ? ' word' : ' words');
+  }
+
+  function autoGrowQuestion() {
+    const q = document.getElementById('prompt-input');
+    if (!q || q.offsetParent === null) return;
+    q.style.height = 'auto';
+    q.style.height = q.scrollHeight + 'px';
+  }
+
+  function autoGrow(el) {
+    if (!el) return;
+    let mirror = document.getElementById('writing-area-mirror');
+    if (!mirror) {
+      mirror = document.createElement('textarea');
+      mirror.id = 'writing-area-mirror';
+      mirror.tabIndex = -1;
+      mirror.setAttribute('aria-hidden', 'true');
+      mirror.setAttribute('readonly', '');
+      document.body.appendChild(mirror);
+    }
+    mirror.style.width = el.clientWidth + 'px';
+    mirror.value = el.value;
+    el.style.height = mirror.scrollHeight + 'px';
+  }
+
+  function clearWriting() {
+    const promptInput = document.getElementById('prompt-input');
+    const area = document.getElementById('writing-area');
+    const hasPrompt = promptInput && promptInput.value.trim() !== '';
+    const hasWriting = area && area.value.trim() !== '';
+    if (!hasPrompt && !hasWriting) return;
+
+    showConfirm(
+      'This will erase everything you have written, including the question. This cannot be undone.',
+      'Clear everything?'
+    ).then(function (confirmed) {
+      if (confirmed) {
+        if (promptInput) { promptInput.value = ''; autoGrowQuestion(); }
+        if (area) {
+          area.value = '';
+          autoGrow(area);
+        }
+        updateWordCount();
+        saveState();
+      }
+    });
+  }
+
+  let copyWritingTimeout = null;
+
+  async function copyWriting() {
+    const promptInput = document.getElementById('prompt-input');
+    const writingArea = document.getElementById('writing-area');
+    const title = (promptInput ? promptInput.value : '').trim();
+    const content = (writingArea ? writingArea.value : '').trim();
+
+    if (!title && !content) {
+      showAlert('There is no text to copy yet.', 'Nothing to copy');
+      return;
+    }
+
+    let formattedText = '';
+    if (title && content) {
+      formattedText = title + '\n\n' + content;
+    } else if (title) {
+      formattedText = title;
+    } else {
+      formattedText = content;
+    }
+
+    let copied = false;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(formattedText);
+        copied = true;
+      } catch (err) {
+        copied = false;
+      }
+    }
+
+    if (!copied) {
+      const ta = document.createElement('textarea');
+      ta.value = formattedText;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        copied = document.execCommand('copy');
+      } catch (e) {
+        copied = false;
+      }
+      document.body.removeChild(ta);
+    }
+
+    if (copied) {
+      const btn = document.getElementById('btn-copy-writing');
+      if (btn) {
+        btn.classList.add('copied');
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+          '<span>Copied!</span>';
+
+        if (copyWritingTimeout) clearTimeout(copyWritingTimeout);
+        copyWritingTimeout = setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            '<span>Copy</span>';
+        }, 2000);
+      }
+    } else {
+      showAlert('Unable to copy text to clipboard automatically. Please select and copy manually.', 'Copy failed');
+    }
+  }
+
+
+  /* ---------------- writing -> image ---------------- */
+  function downloadWritingPNG() {
+    const promptInput = document.getElementById('prompt-input');
+    const writingArea = document.getElementById('writing-area');
+    const question = (promptInput ? promptInput.value : '').trim();
+    const text = (writingArea ? writingArea.value : '').trim();
+
+    if (!text) {
+      showAlert('Write something first, then save it as an image.', 'Nothing to save yet');
+      return;
+    }
+
+    const proceed = () => {
+      const theme = getComputedStyle(document.documentElement);
+      const themeColor = (name, fallback) => (theme.getPropertyValue(name).trim() || fallback);
+      const cSheet = themeColor('--sheet', '#FFFFFF');
+      const cPaper = themeColor('--paper', '#FAF7F0');
+      const cInk = themeColor('--ink', '#1B2430');
+      const cInkSoft = themeColor('--ink-soft', '#5B6472');
+      const cStoneLight = themeColor('--stone-light', '#E6E2D6');
+
+      const words = countWords(text);
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const font = "Delius, 'Comic Sans MS', 'Segoe UI', sans-serif";
+
+      const cGreenDeep = themeColor('--green', '#2F5233');
+      const cTitle = '#12331A';
+      const questionHtml = question
+        ? '<div dir="auto" style="font-size:28px; line-height:1.45; font-weight:700; word-spacing:4px; color:' + cTitle + '; text-shadow:0.5px 0 0 ' + cTitle + ', -0.5px 0 0 ' + cTitle + '; white-space:pre-wrap; word-break:break-word;">' + escapeHtml(question) + '</div>' +
+          '<div style="height:1.5px; background:' + cStoneLight + '; margin:24px 0 24px;"></div>'
+        : '';
+
+      const cText = '#07090C';
+
+      const card = document.createElement('div');
+      card.style.cssText = 'position:absolute; left:-9999px; top:0; width:1060px; padding:12px; background:' + cPaper + '; box-sizing:border-box; font-family:' + font + ';';
+      card.innerHTML =
+        '<div style="position:relative; overflow:hidden; background:' + cSheet + '; border-radius:16px; padding:46px 40px 36px; box-shadow:0 2px 6px rgba(27,36,48,0.08);">' +
+          '<div style="position:absolute; top:0; left:0; right:0; height:5px; background:' + cGreenDeep + ';"></div>' +
+          questionHtml +
+          '<div dir="auto" style="font-size:22px; line-height:1.9; word-spacing:4px; color:' + cText + '; text-shadow:0.12px 0 0 ' + cText + ', -0.12px 0 0 ' + cText + '; white-space:pre-wrap; word-break:break-word;">' + escapeHtml(text) + '</div>' +
+          '<div style="margin-top:34px; text-align:center;">' +
+            '<div style="font-size:18px; color:' + cGreenDeep + '; letter-spacing:0.5px;">My English Journey</div>' +
+            '<div style="margin-top:6px; font-size:13px; color:' + cInkSoft + '; letter-spacing:0.3px;">' + dateStr + '</div>' +
+            '<div style="margin-top:12px; display:inline-block; padding:6px 20px; border-radius:999px; background:#E3EAE0; font-size:19px; font-weight:700; color:' + cTitle + '; letter-spacing:0.4px;">' + words + (words === 1 ? ' word' : ' words') + '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(card);
+
+      html2canvas(card, { scale: 2, backgroundColor: cPaper }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'writing-' + new Date().toISOString().slice(0, 10) + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(card);
+      }).catch(err => {
+        console.error(err);
+        showAlert('Something went wrong while saving the image. Please try again.', 'Export failed');
+        if (card.parentElement) document.body.removeChild(card);
+      });
+    };
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(proceed);
+    } else {
+      proceed();
+    }
+  }
+
+  /* ---------------- vocabulary table ---------------- */
+  function updateRowNumbers() {
+    const numEls = document.querySelectorAll('#vocab-table .vocab-row:not(.head-row) .row-num');
+    numEls.forEach((el, index) => {
+      el.textContent = index + 1;
+    });
+  }
+
+  function createRow(word, meaning, examples, isExampleActive) {
+    const row = document.createElement('div');
+    row.className = 'vocab-row';
+
+    const numEl = document.createElement('div');
+    numEl.className = 'row-num';
+
+    const wordInput = document.createElement('input');
+    wordInput.className = 'vocab-cell word-input';
+    wordInput.type = 'text';
+    wordInput.value = word || '';
+    wordInput.placeholder = 'e.g. resilient';
+    wordInput.spellcheck = false;
+    wordInput.autocomplete = 'off';
+    wordInput.setAttribute('autocorrect', 'off');
+    wordInput.setAttribute('autocapitalize', 'off');
+
+    const meaningWrap = document.createElement('div');
+    meaningWrap.className = 'vocab-cell meaning-cell-wrap';
+
+    const inputRow = document.createElement('div');
+    inputRow.className = 'meaning-input-row';
+
+    const meaningInput = document.createElement('input');
+    meaningInput.className = 'vocab-cell meaning-input';
+    meaningInput.type = 'text';
+    meaningInput.value = meaning || '';
+    meaningInput.placeholder = 'able to recover quickly from setbacks';
+    meaningInput.spellcheck = false;
+    meaningInput.autocomplete = 'off';
+    meaningInput.setAttribute('autocorrect', 'off');
+    meaningInput.setAttribute('autocapitalize', 'off');
+
+    const exBtn = document.createElement('button');
+    exBtn.type = 'button';
+    exBtn.className = 'example-toggle';
+    exBtn.textContent = 'example';
+    exBtn.title = 'Click to toggle example';
+
+    const exWrap = document.createElement('div');
+    exWrap.className = 'examples-wrap';
+    exWrap.style.display = 'none';
+
+    const exLine = document.createElement('div');
+    exLine.className = 'example-line';
+
+    const exDot = document.createElement('span');
+    exDot.className = 'example-bullet';
+    exDot.textContent = '•';
+
+    const exArea = document.createElement('textarea');
+    exArea.className = 'examples-area';
+    exArea.placeholder = 'Add example sentences (each on a new line)...';
+    exArea.rows = 1;
+    exArea.spellcheck = false;
+    exArea.autocomplete = 'off';
+    exArea.setAttribute('autocorrect', 'off');
+    exArea.setAttribute('autocapitalize', 'off');
+
+    function autoGrowEx() {
+      exArea.style.height = 'auto';
+      exArea.style.height = Math.max(22, exArea.scrollHeight) + 'px';
+    }
+
+    exArea.addEventListener('input', autoGrowEx);
+
+    if (examples) {
+      exArea.value = Array.isArray(examples) ? examples.join('\n') : examples;
+    }
+
+    const hasExamples = exArea.value.trim().length > 0;
+    const shouldBeActive = (isExampleActive !== undefined) ? isExampleActive : hasExamples;
+
+    if (shouldBeActive) {
+      exBtn.classList.add('active');
+      exWrap.style.display = 'block';
+      setTimeout(autoGrowEx, 0);
+    }
+
+    exBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isActive = exBtn.classList.toggle('active');
+      if (isActive) {
+        exWrap.style.display = 'block';
+        autoGrowEx();
+        exArea.focus();
+      } else {
+        exWrap.style.display = 'none';
+      }
+      saveState();
+    });
+
+    exLine.appendChild(exDot);
+    exLine.appendChild(exArea);
+    exWrap.appendChild(exLine);
+
+    inputRow.appendChild(meaningInput);
+    inputRow.appendChild(exBtn);
+
+    meaningWrap.appendChild(inputRow);
+    meaningWrap.appendChild(exWrap);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'row-delete';
+    delBtn.setAttribute('aria-label', 'Delete row');
+    delBtn.innerHTML = '&times;';
+    delBtn.addEventListener('click', () => {
+      row.remove();
+      updateRowNumbers();
+      saveState();
+    });
+
+    wordInput.addEventListener('keydown', (e) => handleVocabKeydown(e, wordInput, meaningInput, true));
+    meaningInput.addEventListener('keydown', (e) => handleVocabKeydown(e, meaningInput, wordInput, false));
+    wordInput.addEventListener('paste', (e) => handleVocabPaste(e, wordInput, meaningInput, row));
+
+    row.appendChild(numEl);
+    row.appendChild(wordInput);
+    row.appendChild(meaningWrap);
+    row.appendChild(delBtn);
+    return row;
+  }
+
+  function addRow(word, meaning, examples, isExampleActive) {
+    const table = document.getElementById('vocab-table');
+    const row = createRow(word, meaning, examples, isExampleActive);
+    table.appendChild(row);
+    updateRowNumbers();
+    saveState();
+    return row;
+  }
+
+  /* Enter creates a fresh row; Right/Left arrows hop between word and meaning
+     when the cursor is already at the edge of the text (so normal typing and
+     text-selection with arrow keys still works as expected). */
+  function handleVocabKeydown(e, current, sibling, isWord) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const newRow = addRow();
+      const firstInput = newRow.querySelector('input.vocab-cell');
+      if (firstInput) firstInput.focus();
+      return;
+    }
+
+    if (e.key === 'ArrowRight' && isWord &&
+        current.selectionStart === current.value.length &&
+        current.selectionEnd === current.value.length) {
+      e.preventDefault();
+      sibling.focus();
+      sibling.setSelectionRange(0, 0);
+    } else if (e.key === 'ArrowLeft' && !isWord &&
+                current.selectionStart === 0 && current.selectionEnd === 0) {
+      e.preventDefault();
+      sibling.focus();
+      sibling.setSelectionRange(sibling.value.length, sibling.value.length);
+    }
+  }
+
+  /* Pasting "word = meaning" into the Word field splits it automatically.
+     Pasting several lines at once (each formatted as "word = meaning" or "word = meaning = example") fills
+     the current row with the first line and creates one new row per
+     additional line, right after each other in order. Lines without "="
+     are skipped. A paste with no "=" anywhere falls through to a normal paste. */
+  function handleVocabPaste(e, wordInput, meaningInput, row) {
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if (!text || text.indexOf('=') === -1) return;
+
+    e.preventDefault();
+
+    const pairs = text
+      .split(/\r\n|\r|\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.indexOf('=') !== -1)
+      .map((line) => {
+        const parts = line.split('=').map(s => s.trim());
+        return {
+          word: parts[0] || '',
+          meaning: parts[1] || '',
+          example: parts.slice(2).join('=').trim()
+        };
+      });
+
+    if (pairs.length === 0) return;
+
+    wordInput.value = pairs[0].word;
+    meaningInput.value = pairs[0].meaning;
+    if (pairs[0].example) {
+      const exBtn = row.querySelector('.example-toggle');
+      const exWrap = row.querySelector('.examples-wrap');
+      const exArea = row.querySelector('.examples-area');
+      if (exBtn && exWrap && exArea) {
+        exArea.value = pairs[0].example;
+        exBtn.classList.add('active');
+        exWrap.style.display = 'block';
+        exArea.style.height = 'auto';
+        exArea.style.height = Math.max(22, exArea.scrollHeight) + 'px';
+      }
+    }
+
+    let referenceRow = row;
+    for (let i = 1; i < pairs.length; i++) {
+      const newRow = createRow(pairs[i].word, pairs[i].meaning, pairs[i].example, !!pairs[i].example);
+      referenceRow.insertAdjacentElement('afterend', newRow);
+      referenceRow = newRow;
+    }
+    updateRowNumbers();
+    saveState();
+
+    meaningInput.focus();
+    meaningInput.setSelectionRange(meaningInput.value.length, meaningInput.value.length);
+  }
+
+  function confirmClearAllWords() {
+    const rows = Array.from(document.querySelectorAll('#vocab-table .vocab-row:not(.head-row)'));
+    const hasContent = rows.some((r) => {
+      const wordInput = r.querySelector('input.word-input');
+      const meaningInput = r.querySelector('input.meaning-input');
+      const exArea = r.querySelector('.examples-area');
+      return (wordInput && wordInput.value.trim()) ||
+             (meaningInput && meaningInput.value.trim()) ||
+             (exArea && exArea.value.trim());
+    });
+
+    if (!hasContent) {
+      showAlert('There are no words to clear yet.', 'Nothing here');
+      return;
+    }
+
+    showConfirm(
+      'This removes every word from this list. If you still need a copy, save it as a PNG first.',
+      'Clear all words?'
+    ).then(function (confirmed) {
+      if (confirmed) {
+        rows.forEach((r) => r.remove());
+        addRow('', '');
+      }
+    });
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* Shrinks a word cell's font size, if needed, so a long single word (with no
+     space to wrap at) fits on one line instead of being split mid-word.
+     Multi-word phrases still wrap normally at their spaces. Runs after the
+     export card is in the real DOM, so it measures actual rendered widths. */
+  function fitWordCells(container) {
+    const cells = container.querySelectorAll('.pd-word');
+    cells.forEach((cell) => {
+      let size = parseFloat(getComputedStyle(cell).fontSize);
+      const minSize = 12;
+      let guard = 0;
+      while (cell.scrollWidth > cell.clientWidth + 1 && size > minSize && guard < 20) {
+        size -= 1;
+        cell.style.fontSize = size + 'px';
+        guard++;
+      }
+      if (cell.scrollWidth > cell.clientWidth + 1) {
+        /* still doesn't fit even at the smallest readable size (e.g. one
+           pathologically long token) — allow a controlled break as a
+           last resort rather than letting it spill into the next column */
+        cell.style.overflowWrap = 'break-word';
+        cell.style.wordBreak = 'break-word';
+      }
+    });
+  }
+
+  function downloadPNG() {
+    const rows = Array.from(document.querySelectorAll('#vocab-table .vocab-row:not(.head-row)'));
+    const data = rows.map(r => {
+      const wordInput = r.querySelector('input.word-input');
+      const meaningInput = r.querySelector('input.meaning-input');
+      const exBtn = r.querySelector('.example-toggle');
+      const exArea = r.querySelector('.examples-area');
+
+      const word = wordInput ? wordInput.value.trim() : '';
+      const meaning = meaningInput ? meaningInput.value.trim() : '';
+      const isExActive = exBtn && exBtn.classList.contains('active');
+      const examples = (isExActive && exArea && exArea.value.trim())
+        ? exArea.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean)
+        : [];
+
+      return { word, meaning, examples };
+    }).filter(r => r.word || r.meaning || r.examples.length > 0);
+
+    if (data.length === 0) {
+      showAlert('Add at least one word before saving.', 'Nothing to save yet');
+      return;
+    }
+
+    const proceed = () => {
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const theme = getComputedStyle(document.documentElement);
+      const themeColor = (name, fallback) => (theme.getPropertyValue(name).trim() || fallback);
+      const cWine = themeColor('--wine', '#7A2E38');
+      const cInk = themeColor('--ink', '#1B2430');
+      const cInkSoft = themeColor('--ink-soft', '#5B6472');
+      const cSheet = themeColor('--sheet', '#FFFFFF');
+      const cStone = themeColor('--stone', '#C9C2B4');
+      const cStoneLight = themeColor('--stone-light', '#E6E2D6');
+
+      let rowsHtml = data.map((d, i) => {
+        let examplesHtml = '';
+        if (d.examples && d.examples.length > 0) {
+          examplesHtml =
+            '<div style="margin-top:6px; display:flex; flex-direction:column; gap:4px;">' +
+              d.examples.map(ex =>
+                '<div style="display:flex; align-items:baseline; gap:8px;" dir="auto">' +
+                  '<span style="color:' + cWine + '; font-size:14px; font-weight:700; line-height:1; flex-shrink:0;">•</span>' +
+                  '<span style="font-size:14.5px; line-height:1.55; color:' + cInkSoft + '; word-break:break-word;">' + escapeHtml(ex) + '</span>' +
+                '</div>'
+              ).join('') +
+            '</div>';
+        }
+
+        let meaningHtml = '';
+        if (d.meaning) {
+          meaningHtml = '<div style="font-size:16px; line-height:1.55; color:' + cInk + '; font-weight:500; word-break:break-word;" dir="auto">' + escapeHtml(d.meaning) + '</div>';
+        }
+
+        return (
+          '<div style="display:flex; align-items:flex-start; gap:18px; padding:19px 12px; ' + (i % 2 === 1 ? 'background:#F7F5EF;' : '') + ' border-bottom:1px solid ' + cStoneLight + ';">' +
+            '<div style="flex:0 0 30px; font-family:\'Delius\', \'Comic Sans MS\', sans-serif; font-weight:600; font-size:17px; color:' + cWine + '; opacity:0.75; text-align:right; font-variant-numeric:tabular-nums;">' + (i + 1) + '</div>' +
+            '<div class="pd-word" style="flex:0 0 32%; min-width:0; font-family:\'Delius\', \'Comic Sans MS\', sans-serif; font-weight:600; font-size:21px; line-height:1.25; color:' + cWine + ';">' + escapeHtml(d.word) + '</div>' +
+            '<div style="flex:1; min-width:0;">' +
+              meaningHtml +
+              examplesHtml +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      const card = document.createElement('div');
+      card.style.cssText = 'position:absolute; left:-9999px; top:0; width:780px; padding:40px; font-family:Delius, \'Comic Sans MS\', sans-serif;';
+      card.innerHTML =
+        '<div style="background:' + cSheet + '; border-radius:16px; padding:38px 36px; box-shadow:0 12px 30px rgba(27,36,48,0.10);">' +
+          '<div style="border-bottom:3px solid ' + cWine + '; padding-bottom:16px; margin-bottom:8px;">' +
+            '<div style="font-family:\'Delius\', \'Comic Sans MS\', sans-serif; font-weight:700; font-size:32px; color:' + cInk + ';">Vocabulary List</div>' +
+            '<div style="font-size:14px; color:' + cInkSoft + '; margin-top:5px;">Saved on ' + dateStr + '</div>' +
+          '</div>' +
+          rowsHtml +
+          '<div style="text-align:right; margin-top:20px; font-size:13px; color:' + cStone + '; letter-spacing:0.3px;">My English Journey</div>' +
+        '</div>';
+
+      document.body.appendChild(card);
+      fitWordCells(card);
+
+      html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'vocabulary-list-' + new Date().toISOString().slice(0, 10) + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(card);
+      }).catch(err => {
+        console.error(err);
+        showAlert('Something went wrong while saving the image. Please try again.', 'Export failed');
+        if (card.parentElement) document.body.removeChild(card);
+      });
+    };
+
+    const runSave = () => {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(proceed);
+      } else {
+        proceed();
+      }
+    };
+
+    if (data.length > 15) {
+      showConfirm(
+        'You have ' + data.length + ' words. Generating an image with more than 15 words will make the image very long, but it will still be created. Do you want to continue?',
+        'Large image warning'
+      ).then(function (confirmed) {
+        if (confirmed) runSave();
+      });
+    } else {
+      runSave();
+    }
+  }
+
+  /* ---------------- local persistence (autosave) ---------------- */
+  const STORAGE_KEY = 'practiceDesk:v1';
+
+  function debounce(fn, delay) {
+    let timer = null;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  }
+
+  function collectVocabRows() {
+    return Array.from(document.querySelectorAll('#vocab-table .vocab-row:not(.head-row)')).map((row) => {
+      const wordInput = row.querySelector('input.word-input');
+      const meaningInput = row.querySelector('input.meaning-input');
+      const exBtn = row.querySelector('.example-toggle');
+      const exArea = row.querySelector('.examples-area');
+      return {
+        word: wordInput ? wordInput.value : '',
+        meaning: meaningInput ? meaningInput.value : '',
+        examples: exArea ? exArea.value : '',
+        exampleActive: !!(exBtn && exBtn.classList.contains('active'))
+      };
+    });
+  }
+
+  function saveState() {
+    try {
+      const activeBtn = document.querySelector('.switch-btn.active');
+      const promptInput = document.getElementById('prompt-input');
+      const writingArea = document.getElementById('writing-area');
+      const state = {
+        prompt: promptInput ? promptInput.value : '',
+        writing: writingArea ? writingArea.value : '',
+        mode: activeBtn && activeBtn.id === 'btn-vocab' ? 'vocab' : 'writing',
+        vocabRows: collectVocabRows()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      /* storage unavailable (private browsing, quota, etc.) — fail silently */
+    }
+  }
+
+  const debouncedSave = debounce(saveState, 250);
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function restoreState() {
+    const state = loadState();
+
+    if (!state) {
+      addRow('', '');
+      addRow('', '');
+      addRow('', '');
+      addRow('', '');
+      return;
+    }
+
+    const promptInput = document.getElementById('prompt-input');
+    const writingArea = document.getElementById('writing-area');
+    if (promptInput) { promptInput.value = state.prompt || ''; autoGrowQuestion(); }
+    if (writingArea) {
+      writingArea.value = state.writing || '';
+      autoGrow(writingArea);
+      updateWordCount();
+    }
+
+    if (Array.isArray(state.vocabRows) && state.vocabRows.length > 0) {
+      state.vocabRows.forEach((r) => addRow(r.word, r.meaning, r.examples, r.exampleActive));
+    } else {
+      addRow('', '');
+      addRow('', '');
+      addRow('', '');
+      addRow('', '');
+    }
+
+    if (state.mode === 'vocab') {
+      const btnWriting = document.getElementById('btn-writing');
+      const btnVocab = document.getElementById('btn-vocab');
+      const writingPanel = document.getElementById('writing-panel');
+      const vocabPanel = document.getElementById('vocab-panel');
+      const indicator = document.getElementById('switch-indicator');
+      btnWriting.classList.remove('active');
+      btnVocab.classList.add('active');
+      writingPanel.classList.add('hidden');
+      writingPanel.style.display = 'none';
+      vocabPanel.classList.remove('hidden');
+      vocabPanel.style.display = 'block';
+      positionIndicator(btnVocab);
+      if (indicator) indicator.style.background = 'var(--wine)';
+      recalculateAllExamplesHeight();
+    }
+  }
+
+  /* autosave on any typing anywhere on the desk — a single delegated listener
+     also covers vocab rows created later, since 'input' events bubble. */
+  document.addEventListener('input', debouncedSave);
+
+  restoreState();
+  autoGrowQuestion();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(autoGrowQuestion);
+</script>
+
+</body>
+</html>
