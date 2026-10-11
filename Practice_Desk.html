@@ -701,6 +701,185 @@ Status: Verified & Authenticated
     .btn { font-size: 0.94rem; padding: 12px 22px; }
     .footer-note { font-size: 0.88rem; margin-top: 44px; }
   }
+
+  /* ---------- writing timer ---------- */
+  :root {
+    --alert: #C62828;
+    --alert-soft: #FBE9E7;
+  }
+
+  .timer {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 8px 0 10px;
+    margin-bottom: 10px;
+    background: var(--paper);
+  }
+  /* no blue tap box on touch screens */
+  .timer, .timer * { -webkit-tap-highlight-color: transparent; }
+  .timer button { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+  .timer button:focus:not(:focus-visible) { outline: none; }
+  .timer #timer-focus[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+
+  /* writing mode: only the timer and the writing sheet stay on screen */
+  body.writing-mode .intro,
+  body.writing-mode .switcher-wrap,
+  body.writing-mode .footer-note { display: none; }
+  body.writing-mode .page { padding-top: 8px; }
+  .timer [hidden] { display: none !important; }
+
+  .timer-card {
+    background: var(--sheet);
+    border: 1.5px solid var(--stone-light);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(27, 36, 48, 0.06);
+    overflow: hidden;
+    transition: border-color .3s ease, background-color .3s ease;
+  }
+
+  .timer-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 12px 10px 16px;
+  }
+
+  .timer-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--green); transition: color .3s ease; }
+
+  .timer-readout {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--ink);
+  }
+
+  .timer-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    transition: color .3s ease;
+  }
+
+  .timer-unit { font-size: 0.8rem; color: var(--ink-soft); transition: color .3s ease; }
+
+  .timer[data-state="idle"] .timer-value,
+  .timer[data-state="setup"] .timer-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .timer-controls { display: flex; gap: 8px; }
+  .timer-controls .btn { padding: 8px 14px; font-size: 0.84rem; }
+
+  .timer-progress { height: 4px; background: var(--stone-light); }
+  .timer-progress > span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--green);
+    transition: width .25s linear, background-color .3s ease;
+  }
+  .timer[data-state="idle"] .timer-progress,
+  .timer[data-state="setup"] .timer-progress { display: none; }
+
+  /* last minute / time's up */
+  .timer.is-danger .timer-card { border-color: var(--alert); background: var(--alert-soft); }
+  .timer.is-danger .timer-icon,
+  .timer.is-danger .timer-value,
+  .timer.is-danger .timer-unit { color: var(--alert); }
+  .timer.is-danger .timer-progress > span { background: var(--alert); }
+
+  /* setup */
+  .timer-setup { padding: 2px 16px 16px; border-top: 1px dashed var(--stone-light); }
+  .timer-label { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin: 14px 0 8px; }
+  .timer-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+  .timer-chip {
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--stone);
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .timer-chip:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .timer-chip[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .timer-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+  }
+  .timer-custom input {
+    width: 64px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 6px 8px;
+    border: 1.5px solid var(--stone-light);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    text-align: center;
+    outline: none;
+    transition: border-color .25s ease;
+  }
+  .timer-custom input:focus { border-color: var(--green); }
+
+  .timer-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .timer-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+    font-family: inherit;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--stone-light);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .timer-mode strong { font-size: 0.92rem; font-weight: 600; }
+  .timer-mode small { font-size: 0.78rem; line-height: 1.4; color: var(--ink-soft); }
+  .timer-mode:hover { border-color: var(--stone); }
+  .timer-mode[aria-checked="true"] { border-color: var(--green); background: var(--green-soft); }
+
+  .timer-setup-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+  .timer-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* writing locked (strict mode, time is up) */
+  #writing-area.is-locked,
+  #prompt-input.is-locked { opacity: 0.55; cursor: not-allowed; }
+
+  @media (max-width: 480px) {
+    .timer-modes { grid-template-columns: 1fr; }
+    .timer-value { font-size: 1.4rem; }
+    .timer-bar { padding-left: 14px; }
+    .timer-controls { width: 100%; }
+    .timer-controls .btn { flex: 1; padding-left: 8px; padding-right: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -724,6 +903,58 @@ Status: Verified & Authenticated
         <span>Vocabulary</span>
       </button>
     </div>
+  </div>
+
+  <!-- WRITING TIMER -->
+  <div class="timer" id="timer" data-state="idle">
+    <div class="timer-card">
+      <div class="timer-bar">
+        <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>
+        <div class="timer-readout" role="timer" aria-live="off">
+          <span class="timer-value" id="timer-value">No timer set</span>
+          <span class="timer-unit" id="timer-unit"></span>
+        </div>
+        <div class="timer-controls">
+          <button class="btn ghost" type="button" id="timer-open-setup">Set timer</button>
+          <button class="btn ghost" type="button" id="timer-focus" aria-pressed="false" hidden>Writing mode</button>
+          <button class="btn ghost" type="button" id="timer-toggle" hidden>Pause</button>
+          <button class="btn ghost" type="button" id="timer-reset" hidden>Reset</button>
+        </div>
+      </div>
+      <div class="timer-progress" aria-hidden="true"><span id="timer-progress-fill"></span></div>
+
+      <div class="timer-setup" id="timer-setup" hidden>
+        <div class="timer-label" id="timer-duration-label">Time</div>
+        <div class="timer-presets" role="group" aria-labelledby="timer-duration-label">
+          <button class="timer-chip" type="button" data-minutes="10" aria-pressed="false">10 min</button>
+          <button class="timer-chip" type="button" data-minutes="20" aria-pressed="false">20 min</button>
+          <button class="timer-chip" type="button" data-minutes="40" aria-pressed="false">40 min</button>
+          <button class="timer-chip" type="button" data-minutes="60" aria-pressed="false">60 min</button>
+          <label class="timer-custom">
+            <input type="number" id="timer-minutes" min="1" max="180" inputmode="numeric" aria-label="Custom minutes">
+            <span>min</span>
+          </label>
+        </div>
+
+        <div class="timer-label" id="timer-rule-label">When time runs out</div>
+        <div class="timer-modes" role="radiogroup" aria-labelledby="timer-rule-label">
+          <button class="timer-mode" type="button" role="radio" data-mode="soft" aria-checked="true">
+            <strong>Remind me</strong>
+            <small>You get an alert and can keep writing.</small>
+          </button>
+          <button class="timer-mode" type="button" role="radio" data-mode="strict" aria-checked="false">
+            <strong>Lock writing</strong>
+            <small>Writing stops when time is up.</small>
+          </button>
+        </div>
+
+        <div class="timer-setup-actions">
+          <button class="btn ghost" type="button" id="timer-cancel">Cancel</button>
+          <button class="btn solid-green" type="button" id="timer-start">Start</button>
+        </div>
+      </div>
+    </div>
+    <div class="timer-sr" id="timer-live" aria-live="polite"></div>
   </div>
 
   <div class="panels">
@@ -1690,6 +1921,349 @@ Status: Verified & Authenticated
   restoreState();
   autoGrowQuestion();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(autoGrowQuestion);
+
+  /* ---------------- writing timer ---------------- */
+  /* Rules:
+     - "soft"   : at 0 you get an alert, the timer keeps counting extra time, writing stays open.
+     - "strict" : at 0 the writing area is locked until the timer is reset.
+     - Last 60 seconds: the readout switches to seconds only and turns red.
+     The end time is stored as a timestamp, so the timer stays correct if the
+     tab sleeps or the page is reloaded. */
+  const TIMER_KEY = 'practiceDesk:timer:v1';
+  const TIMER_WARN_SECS = 60;
+  const TIMER_BASE_TITLE = document.title;
+  const timerEls = {};
+  let timerState = { status: 'idle', mode: 'soft', durationMs: 0, endAt: 0, remainingMs: 0 };
+  let timerPrefs = { minutes: 20, mode: 'soft' };
+  let timerInterval = null;
+  let timerWarned = false;
+  let timerFocus = false;       /* writing mode on/off */
+  let timerFocusShown = false;
+
+  function timerPersist() {
+    try { localStorage.setItem(TIMER_KEY, JSON.stringify({ state: timerState, prefs: timerPrefs, focus: timerFocus })); } catch (err) {}
+  }
+
+  function timerRestore() {
+    try {
+      const raw = localStorage.getItem(TIMER_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved && saved.prefs) {
+        const m = parseInt(saved.prefs.minutes, 10);
+        if (m >= 1 && m <= 180) timerPrefs.minutes = m;
+        if (saved.prefs.mode === 'strict') timerPrefs.mode = 'strict';
+      }
+      if (saved && saved.focus === true) timerFocus = true;
+      const s = saved && saved.state;
+      if (s && ['running', 'paused', 'overtime', 'locked'].indexOf(s.status) !== -1
+          && Number(s.durationMs) > 0 && (s.mode === 'soft' || s.mode === 'strict')) {
+        timerState = {
+          status: s.status,
+          mode: s.mode,
+          durationMs: Number(s.durationMs),
+          endAt: Number(s.endAt) || 0,
+          remainingMs: Number(s.remainingMs) || 0
+        };
+      }
+    } catch (err) {}
+  }
+
+  function timerPad(n) { return (n < 10 ? '0' : '') + n; }
+
+  function timerClock(totalSecs) {
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    return h > 0 ? h + ':' + timerPad(m) + ':' + timerPad(s) : timerPad(m) + ':' + timerPad(s);
+  }
+
+  function timerRender() {
+    const now = Date.now();
+    const st = timerState.status;
+    const setupOpen = !timerEls.setup.hidden;
+    let value = 'No timer set';
+    let unit = '';
+    let danger = false;
+    let pct = 0;
+
+    if (st === 'running' || st === 'paused') {
+      const rem = st === 'running' ? Math.max(0, timerState.endAt - now) : timerState.remainingMs;
+      const secs = Math.ceil(rem / 1000);
+      pct = 100 * (1 - rem / timerState.durationMs);
+      if (secs <= TIMER_WARN_SECS) {
+        danger = true;
+        value = String(secs);
+        unit = st === 'paused' ? 'sec · paused' : 'sec left';
+      } else {
+        value = timerClock(secs);
+        unit = st === 'paused' ? 'paused' : 'left';
+      }
+    } else if (st === 'overtime') {
+      danger = true;
+      pct = 100;
+      value = '+' + timerClock(Math.floor(Math.max(0, now - timerState.endAt) / 1000));
+      unit = 'over time';
+    } else if (st === 'locked') {
+      danger = true;
+      pct = 100;
+      value = "Time's up";
+      unit = 'writing locked';
+    }
+
+    timerEls.root.dataset.state = (st === 'idle' && setupOpen) ? 'setup' : st;
+    timerEls.root.classList.toggle('is-danger', danger);
+    timerEls.value.textContent = value;
+    timerEls.unit.textContent = unit;
+    timerEls.fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+
+    const focusOn = timerFocus && st !== 'idle';
+    document.body.classList.toggle('writing-mode', focusOn);
+    if (timerFocusShown && !focusOn) {
+      requestAnimationFrame(() => {
+        const active = document.querySelector('.switch-btn.active');
+        if (active) positionIndicator(active);
+        autoGrowQuestion();
+      });
+    }
+    timerFocusShown = focusOn;
+    timerEls.focusBtn.hidden = (st === 'idle');
+    timerEls.focusBtn.textContent = focusOn ? 'Exit' : 'Writing mode';
+    timerEls.focusBtn.setAttribute('aria-pressed', String(focusOn));
+
+    timerEls.openSetup.hidden = !(st === 'idle' && !setupOpen);
+    timerEls.toggle.hidden = !(st === 'running' || st === 'paused');
+    timerEls.toggle.textContent = st === 'paused' ? 'Resume' : 'Pause';
+    timerEls.reset.hidden = (st === 'idle');
+
+    const locked = (st === 'locked');
+    [document.getElementById('writing-area'), document.getElementById('prompt-input')].forEach((el) => {
+      if (!el) return;
+      el.readOnly = locked;
+      el.classList.toggle('is-locked', locked);
+    });
+
+    document.title = (st === 'running')
+      ? (danger ? value + 's' : value) + ' · ' + TIMER_BASE_TITLE
+      : TIMER_BASE_TITLE;
+
+    if (st === 'running' && danger && !timerWarned) {
+      timerWarned = true;
+      timerEls.live.textContent = 'One minute left';
+    }
+  }
+
+  function timerSyncInterval() {
+    const need = timerState.status === 'running' || timerState.status === 'overtime';
+    if (need && !timerInterval) timerInterval = setInterval(timerTick, 250);
+    if (!need && timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function timerTick() {
+    if (timerState.status === 'running' && Date.now() >= timerState.endAt) {
+      timerFinish();
+      return;
+    }
+    timerRender();
+  }
+
+  function timerBeep() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      const t = ctx.currentTime;
+      [0, 0.28, 0.56].forEach((offset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, t + offset);
+        gain.gain.exponentialRampToValueAtTime(0.25, t + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t + offset);
+        osc.stop(t + offset + 0.25);
+      });
+      setTimeout(() => { if (ctx.close) ctx.close(); }, 1200);
+    } catch (err) {}
+  }
+
+  function timerAlert() {
+    timerBeep();
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (err) {}
+    const strict = timerState.mode === 'strict';
+    const mins = Math.round(timerState.durationMs / 60000);
+    const msg = strict
+      ? 'Your ' + mins + ' minutes are over. Writing is now locked. You can still copy or save what you wrote.'
+      : 'Your ' + mins + ' minutes are over. You can keep writing; the timer will count the extra time.';
+    timerEls.live.textContent = "Time's up";
+    const show = () => {
+      if (document.getElementById('modal-overlay').classList.contains('open')) {
+        setTimeout(show, 600);
+        return;
+      }
+      showModal("Time's up", msg, [{ label: strict ? 'OK' : 'Keep writing', value: true, style: 'solid' }]);
+    };
+    show();
+  }
+
+  function timerFinish() {
+    timerState.status = timerState.mode === 'strict' ? 'locked' : 'overtime';
+    timerPersist();
+    timerSyncInterval();
+    timerRender();
+    timerAlert();
+  }
+
+  /* ---- setup panel ---- */
+  let timerSetupMode = 'soft';
+
+  function timerSyncChips() {
+    const current = parseInt(timerEls.minutes.value, 10);
+    timerEls.chips.forEach((chip) => {
+      chip.setAttribute('aria-pressed', String(parseInt(chip.dataset.minutes, 10) === current));
+    });
+  }
+
+  function timerSetSetupMode(mode) {
+    timerSetupMode = mode;
+    timerEls.modes.forEach((btn) => btn.setAttribute('aria-checked', String(btn.dataset.mode === mode)));
+  }
+
+  function timerOpenSetup() {
+    timerEls.minutes.value = timerPrefs.minutes;
+    timerSetSetupMode(timerPrefs.mode);
+    timerSyncChips();
+    timerEls.setup.hidden = false;
+    timerRender();
+  }
+
+  function timerCloseSetup() {
+    timerEls.setup.hidden = true;
+    timerRender();
+  }
+
+  function timerStart() {
+    const minutes = parseInt(timerEls.minutes.value, 10);
+    if (!(minutes >= 1 && minutes <= 180)) {
+      showAlert('Choose a time between 1 and 180 minutes.', 'Check the time');
+      return;
+    }
+    timerPrefs = { minutes: minutes, mode: timerSetupMode };
+    const ms = minutes * 60000;
+    timerState = { status: 'running', mode: timerSetupMode, durationMs: ms, endAt: Date.now() + ms, remainingMs: ms };
+    timerWarned = false;
+    timerFocus = false;
+    timerEls.setup.hidden = true;
+    timerPersist();
+    timerSyncInterval();
+    timerRender();
+    const area = document.getElementById('writing-area');
+    const btnWriting = document.getElementById('btn-writing');
+    if (area && btnWriting && btnWriting.classList.contains('active')) area.focus();
+  }
+
+  function timerToggle() {
+    if (timerState.status === 'running') {
+      timerState.remainingMs = Math.max(0, timerState.endAt - Date.now());
+      timerState.status = 'paused';
+    } else if (timerState.status === 'paused') {
+      timerState.endAt = Date.now() + timerState.remainingMs;
+      timerState.status = 'running';
+    }
+    timerPersist();
+    timerSyncInterval();
+    timerRender();
+  }
+
+  function timerDoReset() {
+    timerState = { status: 'idle', mode: 'soft', durationMs: 0, endAt: 0, remainingMs: 0 };
+    timerWarned = false;
+    timerFocus = false;
+    timerPersist();
+    timerSyncInterval();
+    timerRender();
+  }
+
+  function timerToggleWritingMode() {
+    if (timerState.status === 'idle') return;
+    timerFocus = !timerFocus;
+    timerPersist();
+    if (timerFocus) {
+      const btnWriting = document.getElementById('btn-writing');
+      if (btnWriting && !btnWriting.classList.contains('active')) setMode('writing');
+      timerRender();
+      const area = document.getElementById('writing-area');
+      if (area) {
+        area.focus();
+        const end = area.value.length;
+        try { area.setSelectionRange(end, end); } catch (err) {}
+      }
+    } else {
+      timerRender();
+    }
+  }
+
+  function timerReset() {
+    if (timerState.status === 'idle') return;
+    if (timerState.status === 'overtime') { timerDoReset(); return; }
+    const locked = timerState.status === 'locked';
+    showConfirm(
+      locked ? 'The timer will be cleared and your writing will be unlocked.' : 'The timer will be stopped and cleared.',
+      'Reset the timer?'
+    ).then((ok) => { if (ok) timerDoReset(); });
+  }
+
+  function timerInit() {
+    timerEls.root = document.getElementById('timer');
+    if (!timerEls.root) return;
+    timerEls.value = document.getElementById('timer-value');
+    timerEls.unit = document.getElementById('timer-unit');
+    timerEls.fill = document.getElementById('timer-progress-fill');
+    timerEls.setup = document.getElementById('timer-setup');
+    timerEls.openSetup = document.getElementById('timer-open-setup');
+    timerEls.toggle = document.getElementById('timer-toggle');
+    timerEls.focusBtn = document.getElementById('timer-focus');
+    timerEls.reset = document.getElementById('timer-reset');
+    timerEls.minutes = document.getElementById('timer-minutes');
+    timerEls.live = document.getElementById('timer-live');
+    timerEls.chips = Array.from(timerEls.root.querySelectorAll('.timer-chip'));
+    timerEls.modes = Array.from(timerEls.root.querySelectorAll('.timer-mode'));
+
+    timerEls.openSetup.addEventListener('click', timerOpenSetup);
+    document.getElementById('timer-cancel').addEventListener('click', timerCloseSetup);
+    document.getElementById('timer-start').addEventListener('click', timerStart);
+    timerEls.toggle.addEventListener('click', timerToggle);
+    timerEls.focusBtn.addEventListener('click', timerToggleWritingMode);
+    timerEls.reset.addEventListener('click', timerReset);
+    timerEls.chips.forEach((chip) => chip.addEventListener('click', () => {
+      timerEls.minutes.value = chip.dataset.minutes;
+      timerSyncChips();
+    }));
+    timerEls.minutes.addEventListener('input', timerSyncChips);
+    timerEls.minutes.addEventListener('keydown', (e) => { if (e.key === 'Enter') timerStart(); });
+    timerEls.modes.forEach((btn) => btn.addEventListener('click', () => timerSetSetupMode(btn.dataset.mode)));
+
+    document.addEventListener('visibilitychange', timerTick);
+    window.addEventListener('pageshow', timerTick);
+
+    timerRestore();
+    if (timerState.status === 'idle') timerFocus = false;
+    if (timerFocus) {
+      const btnWriting = document.getElementById('btn-writing');
+      if (btnWriting && !btnWriting.classList.contains('active')) setMode('writing');
+    }
+    timerSyncInterval();
+    if (timerState.status === 'running' && Date.now() >= timerState.endAt) {
+      timerFinish();   /* time ran out while the page was closed */
+    } else {
+      timerRender();
+    }
+  }
+
+  timerInit();
 </script>
 
 </body>
