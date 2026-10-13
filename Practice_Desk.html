@@ -1969,15 +1969,6 @@ Status: Verified & Authenticated
     } catch (err) {}
   }
 
-  function timerPad(n) { return (n < 10 ? '0' : '') + n; }
-
-  function timerClock(totalSecs) {
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    const s = totalSecs % 60;
-    return h > 0 ? h + ':' + timerPad(m) + ':' + timerPad(s) : timerPad(m) + ':' + timerPad(s);
-  }
-
   function timerRender() {
     const now = Date.now();
     const st = timerState.status;
@@ -1996,14 +1987,14 @@ Status: Verified & Authenticated
         value = String(secs);
         unit = st === 'paused' ? 'sec · paused' : 'sec left';
       } else {
-        value = timerClock(secs);
-        unit = st === 'paused' ? 'paused' : 'left';
+        value = String(Math.ceil(secs / 60));   /* minutes only until the last minute */
+        unit = st === 'paused' ? 'min · paused' : 'min left';
       }
     } else if (st === 'overtime') {
       danger = true;
       pct = 100;
-      value = '+' + timerClock(Math.floor(Math.max(0, now - timerState.endAt) / 1000));
-      unit = 'over time';
+      value = '+' + Math.floor(Math.max(0, now - timerState.endAt) / 1000);   /* extra time in seconds */
+      unit = 'sec over time';
     } else if (st === 'locked') {
       danger = true;
       pct = 100;
@@ -2044,7 +2035,7 @@ Status: Verified & Authenticated
     });
 
     document.title = (st === 'running')
-      ? (danger ? value + 's' : value) + ' · ' + TIMER_BASE_TITLE
+      ? value + (danger ? 's' : 'm') + ' · ' + TIMER_BASE_TITLE
       : TIMER_BASE_TITLE;
 
     if (st === 'running' && danger && !timerWarned) {
