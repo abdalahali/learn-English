@@ -924,62 +924,73 @@
   .table-scroll {
     overflow-x: auto;
     max-width: 100%;
-    border: 1px solid var(--stone-light);
-    border-radius: 10px;
-    background: var(--sheet);
-    min-height: 110px;
+    background: transparent;
   }
   .data-table { min-width: 460px; }
-  .t-row { display: flex; align-items: stretch; }
-  .t-row + .t-row { border-top: 1px solid var(--stone-light); }
-  .t-row.head-row { background: var(--paper); }
-  .t-cell { flex: 1 1 0; min-width: 150px; border-right: 1px solid var(--stone-light); position: relative; }
-  .t-cell:last-of-type { border-right: none; }
+  .t-row { display: flex; align-items: flex-start; gap: 10px; }
+  .t-row:not(.head-row) { border-bottom: 1px solid var(--stone-light); }
+  html[data-theme="dark"] .t-row.head-row { background: transparent; }
 
-  .col-header { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 10px; }
+  /* row numbers, like the Vocabulary list */
+  .row-num {
+    flex: 0 0 28px;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    font-weight: 600;
+    color: var(--table-accent, var(--wine));
+    opacity: 0.75;
+    text-align: right;
+    padding: 10px 6px 0 0;
+    user-select: none; -webkit-user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .row-num.head {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    opacity: 1;
+    padding: 0 6px 10px 0;
+    border-bottom: 2px solid var(--table-accent, var(--wine));
+  }
+
+  .t-cell { flex: 1 1 0; min-width: 150px; position: relative; }
+
+  /* header: small coloured label with a coloured underline */
+  .col-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 4px 10px 10px;
+    border-bottom: 2px solid var(--col, var(--wine));
+  }
   .col-color-dot {
-    width: 14px;
-    height: 14px;
-    min-width: 14px;
-    min-height: 14px;
-    max-width: 14px;
-    max-height: 14px;
-    aspect-ratio: 1 / 1;
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    min-height: 10px;
     border-radius: 50% !important;
     flex-shrink: 0;
     cursor: pointer;
-    border: 2px solid var(--paper);
+    border: none;
     padding: 0 !important;
     margin: 0;
-    background: transparent;
     outline: none;
-    display: inline-block;
-    vertical-align: middle;
     appearance: none;
     -webkit-appearance: none;
     box-sizing: border-box;
     transition: transform .15s ease;
   }
-  .col-color-dot:hover {
-    transform: scale(1.18);
-  }
+  .col-color-dot:hover { transform: scale(1.3); }
   .col-name-input {
     flex: 1;
     min-width: 0;
     border: none;
     background: transparent;
-    font: 700 0.82rem 'Mali', sans-serif;
+    font: 600 0.8rem 'Mali', sans-serif;
     outline: none;
-    padding: 2px;
+    padding: 2px 0;
   }
-  .col-name-input::placeholder {
-    color: var(--ink-soft);
-    opacity: 0.45;
-    font-weight: 500;
-  }
+  .col-name-input::placeholder { color: var(--ink-soft); opacity: 0.45; font-weight: 500; }
   .col-delete-btn {
     width: 20px; height: 20px; border: none; background: transparent; color: var(--ink-soft);
-    opacity: 0.45; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 5px;
+    opacity: 0.55; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 5px;
   }
   .col-delete-btn:hover { opacity: 1; color: var(--wine); }
   .col-delete-btn svg { width: 12px; height: 12px; }
@@ -1029,12 +1040,13 @@
     height: 0 !important;
   }
   textarea.cell-input::placeholder { color: var(--ink-soft); opacity: 0.4; }
+  .col-name-input:focus-visible, textarea.cell-input:focus-visible, .col-color-dot:focus-visible { outline: none; }
 
-  .row-controls-cell { width: 36px; flex: 0 0 36px; display: flex; align-items: center; justify-content: center; }
-  .row-controls-cell.head { visibility: hidden; }
+  .row-controls-cell { width: 26px; flex: 0 0 26px; display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; }
+  .row-controls-cell.head { visibility: hidden; padding: 0; }
   .row-delete-btn {
-    border: none; background: transparent; color: var(--ink-soft); opacity: 0.5; cursor: pointer;
-    width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent; color: var(--ink-soft); opacity: 0.55; cursor: pointer;
+    width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
   }
   .row-delete-btn:hover { opacity: 1; color: var(--wine); }
   .row-delete-btn svg { width: 13px; height: 13px; }
@@ -1382,11 +1394,6 @@
   .type-choice span { font-size: 0.8rem; font-weight: 600; }
   .type-choice:hover { border-color: var(--stone); }
   .type-choice.selected { border-color: var(--wine); color: var(--wine); background: rgba(122,46,56,0.06); }
-  .type-choice.disabled { opacity: 0.45; cursor: not-allowed; }
-  .type-choice .soon-tag {
-    font-size: 0.6rem; font-weight: 700; text-transform: uppercase; background: var(--stone-light);
-    color: var(--ink-soft); padding: 1px 6px; border-radius: 999px;
-  }
 
   .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
@@ -1712,11 +1719,6 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
           <span>Table</span>
         </button>
-        <button type="button" class="type-choice disabled" data-type="flashcards" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="10" rx="2"/><path d="M8 6V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></svg>
-          <span>Flashcards</span>
-          <span class="soon-tag">Soon</span>
-        </button>
       </div>
     </div>
     <div class="modal-actions">
@@ -2040,19 +2042,19 @@ function autoGrow(el) {
     mirror.setAttribute('readonly', '');
     document.body.appendChild(mirror);
   }
+  // Measure with exactly the style of the box being sized. (The mirror's stylesheet rules are !important,
+  // so the values must be set with the "important" priority too, otherwise they are silently ignored.)
+  const cs = getComputedStyle(el);
+  const put = (prop, val) => mirror.style.setProperty(prop, val, 'important');
   const w = el.clientWidth;
-  if (w) mirror.style.width = w + 'px';
-  if (el.classList.contains('cell-input')) {
-    mirror.style.fontFamily = "'Mali', sans-serif";
-    mirror.style.fontSize = '0.86rem';
-    mirror.style.lineHeight = '1.45';
-    mirror.style.padding = '8px 10px';
-  } else {
-    mirror.style.fontFamily = "'Mali', sans-serif";
-    mirror.style.fontSize = '1.01rem';
-    mirror.style.lineHeight = '1.75';
-    mirror.style.padding = '6px 2px';
-  }
+  if (w) put('width', w + 'px');
+  put('font-family', cs.fontFamily);
+  put('font-size', cs.fontSize);
+  put('font-weight', cs.fontWeight);
+  put('line-height', cs.lineHeight);
+  put('letter-spacing', cs.letterSpacing);
+  put('padding-top', cs.paddingTop); put('padding-right', cs.paddingRight);
+  put('padding-bottom', cs.paddingBottom); put('padding-left', cs.paddingLeft);
   mirror.value = el.value;
   el.style.height = mirror.scrollHeight + 'px';
 }
@@ -4460,25 +4462,31 @@ function buildTableCard(sec) {
 
   const headRow = document.createElement('div');
   headRow.className = 't-row head-row';
+  const numHead = document.createElement('div');
+  numHead.className = 'row-num head';
+  numHead.textContent = '#';
+  headRow.appendChild(numHead);
   sec.columns.forEach(col => {
     const cell = document.createElement('div');
     cell.className = 't-cell';
     const colHead = document.createElement('div');
     colHead.className = 'col-header';
+    colHead.style.setProperty('--col', col.color);
     const dot = document.createElement('button');
     dot.type = 'button'; dot.className = 'col-color-dot'; dot.title = 'Column color';
-    dot.style.background = col.color; dot.style.boxShadow = '0 0 0 1.5px ' + col.color;
+    dot.style.background = col.color;
     if (!isEditMode) {
-      dot.style.cursor = 'default';
+      dot.style.display = 'none';
     } else {
       dot.onclick = () => openColorPopover(dot, col.color, (color) => {
-        col.color = color; dot.style.background = color; dot.style.boxShadow = '0 0 0 1.5px ' + color;
+        col.color = color; dot.style.background = color;
+        colHead.style.setProperty('--col', color);
         nameInput.style.color = color; markDirty();
       });
     }
     const nameInput = document.createElement('input');
     nameInput.type = 'text'; nameInput.className = 'col-name-input'; nameInput.value = col.name; nameInput.style.color = col.color;
-    nameInput.placeholder = 'Column name…';
+    nameInput.placeholder = 'Column name';
     nameInput.spellcheck = false; nameInput.setAttribute('autocomplete', 'off');
     if (!isEditMode) nameInput.readOnly = true;
     nameInput.oninput = () => { col.name = nameInput.value; markDirty(); };
@@ -4495,9 +4503,13 @@ function buildTableCard(sec) {
   headRow.appendChild(headSpacer);
   table.appendChild(headRow);
 
-  sec.rows.forEach(row => {
+  sec.rows.forEach((row, rowIndex) => {
     const tr = document.createElement('div');
     tr.className = 't-row';
+    const numEl = document.createElement('div');
+    numEl.className = 'row-num';
+    numEl.textContent = String(rowIndex + 1);
+    tr.appendChild(numEl);
     sec.columns.forEach(col => {
       const cell = document.createElement('div');
       cell.className = 't-cell';
@@ -4514,7 +4526,7 @@ function buildTableCard(sec) {
       const ta = document.createElement('textarea');
       ta.className = 'cell-input'; const sp = splitContent(row.cells[col.id] || ''); ta.value = sp.display; ta._bc = sp.bc; ta._dispVal = sp.display; ta.rows = 1;
       ta.spellcheck = false; ta.setAttribute('autocorrect', 'off'); ta.setAttribute('autocapitalize', 'off');
-      ta.setAttribute('data-row', row.id); ta.placeholder = col.name || '';
+      ta.setAttribute('data-row', row.id); ta.placeholder = col.name || 'Type here\u2026';
       if (!isEditMode) ta.readOnly = true;
       ta.oninput = () => { syncMeta(ta); row.cells[col.id] = composeContent(ta.value, ta._bc); autoGrow(ta); markDirty(); };
       ta.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { if (!isEditMode || isFileLocked) return; e.preventDefault(); addRow(sec, row.id); } };
