@@ -103,6 +103,9 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .sgrid:not(.hide){display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:0 18px;align-items:start}
 .sgrid .card:last-child{grid-column:1/-1}
 @media(max-width:560px){.hint{display:none}.act .p{width:100%}.tools{gap:8px}}
+.cz:not(.whole) .tg .s{min-width:.64em;padding:0 .04em;margin:0 1px}
+.tbar{height:3px;margin:-5px 0 12px;border-radius:2px;background:var(--grid)}
+.tbar i{display:block;height:100%;width:100%;border-radius:2px;background:#4aa8ff;transition:width .25s linear,background .4s}
 </style>
 </head>
 <body><main>
@@ -137,6 +140,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 <section id="quiz" class="hide">
  <div class="row" style="justify-content:space-between"><span class="tag" id="kind"></span><span class="row"><small id="tm"></small><small id="cnt"></small><button id="quit" style="padding:2px 10px;font-size:.85rem">Quit</button></span></div>
  <div class="bar"><i id="pb"></i></div>
+ <div class="tbar"><i id="tb"></i></div>
  <div class="card" id="qc">
   <div class="tools">
    <button id="spk" aria-label="Play again">🔊</button>
@@ -174,9 +178,9 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const qt=s=>s.replace(/[’‘]/g,"'");
 const norm=s=>qt(s.toLowerCase()).replace(/[^\p{L}\p{N}'\s-]/gu," ").split(/\s+/).map(w=>w.replace(/^['-]+|['-]+$/g,'')).filter(Boolean);
 const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
-const PROMPT=`Make a spelling dictation quiz from the words I studied today. Return ONLY valid JSON, no extra text:
+const PROMPT=`Make a spelling dictation quiz from the words, idioms, phrasal verbs and collocations I studied today. Return ONLY valid JSON, no extra text:
 {"title":"Day …","items":[{"word":"…","s1":"…","s2":"…","s2b":"…","s3":"…"}]}
-Rules: 4 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word (1-2 words) in every sentence. s1, s2 and s2b: clear sentences of 8-14 words. s3: an academic sentence of 14-22 words that may mark a second word from my list. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
+Rules: 4 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word or phrase in every sentence (never double asterisks; inflected forms are fine). s1, s2 and s2b: clear sentences of 8-14 words. s3: an academic sentence of 14-22 words that may mark a second word from my list. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
 $('#prm').textContent=PROMPT;
 const copy=(t,b)=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove()}).then(()=>b.textContent='Copied');
 $('#cp').onclick=()=>copy(PROMPT,$('#cp'));
@@ -237,10 +241,14 @@ function align(E,U){
 }
 /* ---------- quiz flow ---------- */
 let items=[],R=0,Q=[],qi=0,cur=null,done=false,log=[],title='',played=0,weak=new Set();
-let RUN={total:10,word:10,sent:30,whole:false,mp:0},tot=600,wt=10,tStarted=false,paused=false,lastKey=0,tick=null,tlast=0;
-const CFG=Object.assign({total:10,word:10,sent:30,whole:false,mp:0},LS('sc_cfg')||{});
+let RUN={total:10,word:15,sent:30,whole:false,mp:0},tot=600,wt=15,tStarted=false,paused=false,lastKey=0,tick=null,tlast=0;
+const CFG=Object.assign({total:10,word:15,sent:30,whole:false,mp:0},LS('sc_cfg')||{});
 const fmt=x=>{x=Math.max(0,Math.ceil(x));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
-function tm(){$('#tm').textContent='⏱ '+fmt(tot)+(cur&&!cur.fix&&!done?' · '+fmt(wt):'')}
+function tm(){
+ $('#tm').textContent='⏱ '+fmt(tot);
+ const lim=cur?(cur.k=='word'?RUN.word:RUN.sent):1,f=cur&&!cur.fix?Math.max(0,Math.min(1,wt/lim)):0,b=$('#tb');
+ b.style.width=(f*100)+'%';b.style.background=f>.5?'#4aa8ff':f>.25?'#ffd45a':'#ff4d5e';
+}
 function stopT(){clearInterval(tick);tStarted=false;paused=false;$('#idle').hidden=true}
 function resume(){if(!paused)return;paused=false;tlast=lastKey=Date.now();$('#idle').hidden=true;$('#ans').focus()}
 function keyed(){
@@ -337,7 +345,7 @@ function paint(){
  else{const ex=cur.exp.trim().split(/\s+/),n=ex.length,P=v.replace(/^\s+/,'').split(/\s+/),act=P.length-1;
   const c=i=>done?(norm(P[i]||'').join(' ')==norm(ex[i]||'').join(' ')?' g':' r'):(i==act?' on':'')+(i>=n?' x':'');
   h=Array.from({length:Math.max(n,P.length,1)},(_,i)=>`<span class="s w${c(i)}">${esc(P[i]||'')}</span>`).join(' ')}
- $('#prompt').innerHTML=h;
+ $('#prompt').classList.toggle('whole',!!cur.whole);$('#prompt').innerHTML=h;
 }
 function ui(ok){
  const A=$('#ans');A.readOnly=true;A.className=ok?'ok':'no';
@@ -346,7 +354,7 @@ function ui(ok){
 }
 function onInput(){
  keyed();const a=$('#ans');
- if(cur.k=='word'&&/\s/.test(a.value))a.value=a.value.replace(/\s/g,'');
+ if(cur.k=='word'&&!/\s/.test(cur.exp)&&/\s/.test(a.value))a.value=a.value.replace(/\s/g,'');
  if(cur.k=='s1'&&!done){
   if(a.value!==fixq(a.value))a.value=fixq(a.value);
   const E=fixq(cur.T),v=a.value,p=cur.prev;let np=null;
@@ -396,7 +404,8 @@ $('#ans').onkeydown=e=>{keyed();if(e.key=='Enter'&&!e.shiftKey){e.preventDefault
 $('#eye').onclick=()=>{cur.eye=!cur.eye;paint();$('#ans').focus()};
 document.addEventListener('keydown',()=>{if(paused)resume()});$('#idle').onclick=resume;
 const OPT={total:[7,8,9,10,11,12].map(v=>[v,''+v]),word:[7,10,15,20].map(v=>[v,''+v]),sent:[20,30,45,60].map(v=>[v,''+v]),whole:[[false,'Off'],[true,'On']],mp:[[0,'∞'],[1,'1'],[2,'2'],[3,'3'],[5,'5']]};
-['word','sent'].forEach(k=>{if(!OPT[k].some(o=>o[0]===CFG[k]))CFG[k]=OPT[k][1][0]});
+['word','sent'].forEach(k=>{if(!OPT[k].some(o=>o[0]===CFG[k]))CFG[k]=k=='word'?15:30});
+if(CFG.word===10)CFG.word=15;
 function drawCfg(){document.querySelectorAll('#cfg .chips').forEach(c=>{const k=c.dataset.k;c.innerHTML=OPT[k].map(([v,l])=>`<button class="chip${CFG[k]===v?' on':''}" data-v="${v}">${l}</button>`).join('')})}
 $('#cfg').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const k=b.parentNode.dataset.k,v=b.dataset.v;CFG[k]=k=='whole'?v=='true':+v;LS('sc_cfg',CFG);drawCfg()};
 $('#gear').onclick=()=>{drawCfg();$('#cfg').showModal()};$('#cfgx').onclick=()=>$('#cfg').close();
