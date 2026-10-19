@@ -40,7 +40,8 @@ textarea{width:100%;background:var(--paper);border:1.5px solid var(--line);borde
 @keyframes w{to{transform:scale(1.35);opacity:0}}
 @media(prefers-reduced-motion:reduce){#spk.on::after{animation:none}}
 .cz{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:600;font-size:clamp(1.15rem,.75rem + 1.7vw,2rem);text-align:center;margin:0;padding:14px 0;line-height:2.1;min-height:3.4em}
-.s{display:inline-block;min-width:1em;padding:0 .1em;margin:0 2px;border-bottom:3px solid var(--dash);text-align:center;font:600 1em/1.5 'Bricolage Grotesque',sans-serif;height:1.6em;vertical-align:bottom;color:var(--ink)}
+.s{display:inline-block;min-width:1em;padding:0 .1em;margin:0 2px;border-bottom:3px solid var(--dash);text-align:center;font:600 1em/1.3 'Bricolage Grotesque',sans-serif;vertical-align:baseline;color:var(--ink)}
+.s:empty::before{content:"\200b"}
 .s.w{min-width:3em;margin:0 4px}
 .s.on{border-color:var(--hi);animation:blink 1s infinite}@keyframes blink{50%{border-color:transparent}}
 .s.x,.s.r{border-color:var(--bad);color:var(--bad)}.s.g{border-color:var(--ok);color:var(--ok)}
@@ -74,7 +75,7 @@ pre{white-space:pre-wrap;background:var(--paper);border-radius:8px;padding:10px;
 [hidden]{display:none!important}
 .gh{font-style:normal;color:var(--mute);opacity:.6}
 .gap{display:inline-block;width:.8em}
-.tg{font-size:1.14em;margin:0 4px}.tg .s{color:var(--hi);border-color:var(--hi)}
+.tg{margin:0 4px}.tg .s{color:var(--hi);border-color:var(--hi)}
 .tg .s.on{border-color:#fff}.tg .s.g{color:var(--ok);border-color:var(--ok)}.tg .s.r,.tg .s.x{color:var(--bad);border-color:var(--bad)}
 .rev{background:var(--hi);color:#12263a;border-radius:12px;padding:8px 12px;margin:8px 0;font:700 1.25rem 'Bricolage Grotesque',sans-serif;text-align:center}
 .eye{width:48px;height:48px;padding:0;border-radius:50%;display:grid;place-items:center;flex:none;background:transparent;border:0;transition:box-shadow .4s ease,transform .25s ease}
@@ -184,7 +185,7 @@ const norm=s=>qt(s.toLowerCase()).replace(/[^\p{L}\p{N}'\s-]/gu," ").split(/\s+/
 const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
 const PROMPT=`Make a spelling dictation quiz from the words, idioms, phrasal verbs and collocations I studied today. Return ONLY valid JSON, no extra text:
 {"title":"Day …","items":[{"word":"…","s1":"…","s2":"…","s2b":"…","s3":"…"}]}
-Rules: 4 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word or phrase in every sentence (never double asterisks; inflected forms are fine). s1, s2 and s2b: clear sentences of 8-14 words. s3: an academic sentence of 14-22 words that may mark a second word from my list. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
+Rules: 4 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word or phrase in every sentence (never double asterisks; inflected forms are fine). Check that EVERY sentence has them before answering. s1, s2 and s2b: clear sentences of 8-14 words. s3: an academic sentence of 14-22 words that may mark a second word from my list. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
 $('#prm').textContent=PROMPT;
 const copy=(t,b)=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove()}).then(()=>b.textContent='Copied');
 $('#cp').onclick=()=>copy(PROMPT,$('#cp'));
@@ -296,17 +297,29 @@ function accept(E,p,add){
  }
  while(p.length<E.length&&[...E.slice(p.length)].every(isP))p+=E[p.length];
  return p}
-function parse(str){
- const segs=String(str).replace(/\*{2,}/g,'*').split('*').map((x,i)=>({t:i%2==1,s:i%2?x.trim():x})).filter(x=>x.s);
- const tg=segs.filter(x=>x.t);if(!tg.length)throw 'Mark the target word with *asterisks* in: '+str;
- return{segs,full:segs.map(x=>x.s).join('').replace(/\s+/g,' ').trim(),T:tg.map(x=>x.s).join(' ')}}
+function autoMark(str,word){
+ const w=String(word||'').trim().toLowerCase();if(!w)return str;
+ const m=new RegExp('(^|[^\\p{L}\\p{N}])('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?![\\p{L}\\p{N}])','iu').exec(str);
+ if(m){const k=m.index+m[1].length;return str.slice(0,k)+'*'+m[2]+'*'+str.slice(k+m[2].length)}
+ if(/\s/.test(w))return str;
+ let best=null,bl=0;
+for(const t of str.matchAll(/[\p{L}\p{N}']+/gu)){const x=t[0].toLowerCase();let i=0;while(i<x.length&&i<w.length&&x[i]==w[i])i++;if(i>bl){bl=i;best=t}}
+if(best&&bl>=Math.min(w.length,Math.max(4,w.length-3)))return str.slice(0,best.index)+'*'+best[0]+'*'+str.slice(best.index+best[0].length);
+  return str;
+}
+function parse(str,word,need){
+ str=String(str).replace(/\*{2,}/g,'*');
+ if(!str.includes('*'))str=autoMark(str,word);
+ const segs=str.split('*').map((x,i)=>({t:i%2==1,s:i%2?x.trim():x})).filter(x=>x.s);
+ const tg=segs.filter(x=>x.t);if(!tg.length&&need)throw 'No target word is marked in the first sentence of "'+word+'": '+str;
+  return{segs,full:segs.map(x=>x.s).join('').replace(/\s+/g,' ').trim(),T:tg.map(x=>x.s).join(' ')}}
 function build(data){
  if(!data||!Array.isArray(data.items))throw 'The JSON needs an "items" list.';
  const J=data.settings||{};RUN={total:CFG.total,word:CFG.word,sent:CFG.sent,whole:J.sentence_mode!=null?(J.sentence_mode===true||J.sentence_mode==='true'):CFG.whole,mp:J.max_plays??data.max_plays??CFG.mp};
  const MP=Math.max(0,parseInt(RUN.mp)||0);
  items=data.items.filter(x=>x&&x.word).map(x=>{
-  if(!x.s1||!x.s2||!x.s3)throw 'Each word needs s1, s2 and s3 sentences (new format, see the prompt).';
-  return{w:String(x.word).trim(),lim:parseInt(x.plays)||MP,s:{s1:parse(x.s1),s2:parse(x.s2),s2b:x.s2b?parse(x.s2b):null,s3:parse(x.s3)}}});
+  if(!x.s1||!x.s2||!x.s3)throw 'The item "'+x.word+'" needs s1, s2 and s3 sentences (new format, see the prompt).';
+  return{w:String(x.word).trim(),lim:parseInt(x.plays)||MP,s:{s1:parse(x.s1,x.word,true),s2:parse(x.s2,x.word),s2b:x.s2b?parse(x.s2b,x.word):null,s3:parse(x.s3,x.word)}}});
  if(!items.length)throw 'No valid items.';
  title=data.title||'Quiz';log=[];weak=new Set();
  $('#setup').classList.add('hide');$('#report').classList.add('hide');$('#quiz').classList.remove('hide');
