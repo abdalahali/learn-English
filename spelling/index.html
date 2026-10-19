@@ -111,6 +111,13 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 .cz:not(.whole) .tg .s{min-width:.64em;padding:0 .04em;margin:0 1px}
 .tbar{height:3px;margin:-5px 0 12px;border-radius:2px;background:var(--grid)}
 .tbar i{display:block;height:100%;width:100%;border-radius:2px;background:#4aa8ff;transition:width .25s linear,background .4s}
+.rev .dl{color:#c1121f;text-decoration:none;border-bottom:3px solid #c1121f;font-weight:800}
+.s.r.on{border-color:var(--hi);animation:blink 1s infinite}
+.s.an-sh{animation:shk .38s}.s.an-pop{animation:popin .38s}
+.s.r.on.an-sh{animation:shk .38s,blink 1s .38s infinite}
+@keyframes shk{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes popin{0%{transform:scale(.75)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.s.an-sh,.s.an-pop,.s.r.on{animation:none!important}}
 </style>
 </head>
 <body><main>
@@ -234,15 +241,15 @@ function lev(a,b){const d=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=
 function align(E,U){
  const n=E.length,m=U.length,L=[...Array(n+1)].map(()=>Array(m+1).fill(0));
  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i][j]=E[i]==U[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
- let i=0,j=0,ge=[],gu=[],errs=[],bad=Array(m).fill(1),miss=Array(n).fill(1);
+ let i=0,j=0,ge=[],gu=[],errs=[],bad=Array(m).fill(1),miss=Array(n).fill(1),mt=Array(n).fill(-1);
  const flush=()=>{const k=Math.min(ge.length,gu.length);
   for(let x=0;x<k;x++){const e=E[ge[x]],g=U[gu[x]];errs.push({k:lev(e,g)<=Math.max(1,Math.floor(e.length*.4))?'spelling':'wrong word',exp:e,got:g})}
   for(let x=k;x<ge.length;x++)errs.push({k:'missing word',exp:E[ge[x]],got:''});
   for(let x=k;x<gu.length;x++)errs.push({k:'extra word',exp:'',got:U[gu[x]]});ge=[];gu=[]};
  while(i<n||j<m){
-  if(i<n&&j<m&&E[i]==U[j]){flush();bad[j]=0;miss[i]=0;i++;j++}
+  if(i<n&&j<m&&E[i]==U[j]){flush();bad[j]=0;miss[i]=0;mt[i]=j;i++;j++}
   else if(j>=m||(i<n&&L[i+1][j]>=L[i][j+1]))ge.push(i++);else gu.push(j++)}
- flush();return{errs,bad,miss}
+ flush();return{errs,bad,miss,mt}
 }
 /* ---------- quiz flow ---------- */
 let items=[],R=0,Q=[],qi=0,cur=null,done=false,log=[],title='',played=0,weak=new Set();
@@ -279,7 +286,7 @@ function timeUp(){
   $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Time is up</b><p>Correct: <span class="g">${esc(cur.exp)}</span></p><p><small>This word will come back soon.</small></p></div>`;
   requeue();done=true;ui(false);return;
  }
- cur.fix=true;wt=0;tm();
+ wt=0;tm();if(cur.k=='sent')return startFix(typed,true,'Time is up');cur.fix=true;
  $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Time is up</b><p>${cur.k=='s1'?'Finish typing it with the answer in view.':'Now type the whole sentence correctly.'}</p></div>`;
  if(cur.k=='s1'){cur.rev=true;cur.mis++;$('#top').innerHTML=`<div class="rev">${esc(cur.T)}</div>`;paint();return}
  $('#top').innerHTML=`<div class="rev">${esc(cur.exp)}</div>`;$('#ans').value='';paint();
@@ -359,6 +366,8 @@ function paint(){
  else if(cur.k=='s1'){let off=0;const W=cur.whole;
   h=cur.segs.map(x=>{if(!x.t&&!W)return esc(x.s);const rel=v.length-off,
    o=`<span class="${x.t?'tg':'pw'}">${chars(x.s,v.slice(off,off+x.s.length),W?(i=>g||cur.rws.has(cur.wid[off+i])):g,rel>=0&&rel<x.s.length?rel:-1)}</span>`;off+=x.s.length+(W?0:1);return o}).join('')}
+ else if(cur.fix){
+  h=cur.sl.map((x,i)=>`<span class="s w${x.ok?' g':x.dirty?'':' r'}${i==cur.sel&&!x.ok?' on':''}${x.an?' an-'+x.an:''}" data-i="${i}">${esc(x.v)}</span>`).join(' ')}
  else{const ex=cur.exp.trim().split(/\s+/),n=ex.length,P=v.replace(/^\s+/,'').split(/\s+/),act=P.length-1;
   const c=i=>done?(norm(P[i]||'').join(' ')==norm(ex[i]||'').join(' ')?' g':' r'):(i==act?' on':'')+(i>=n?' x':'');
   h=Array.from({length:Math.max(n,P.length,1)},(_,i)=>`<span class="s w${c(i)}">${esc(P[i]||'')}</span>`).join(' ')}
@@ -371,6 +380,11 @@ function ui(ok){
 }
 function onInput(){
  keyed();const a=$('#ans');
+  if(cur.k=='sent'&&cur.fix&&!done){
+   const sl=cur.sl[cur.sel];if(!sl)return;let v=a.value;cur.sl.forEach(x=>x.an='');
+   if(/\s/.test(v)){v=v.replace(/\s/g,'');a.value=v;sl.v=v;sl.dirty=true;return selStep()}
+   sl.v=v;sl.dirty=true;return paint();
+  }
  if(cur.k=='word'&&!/\s/.test(cur.exp)&&/\s/.test(a.value))a.value=a.value.replace(/\s/g,'');
  if(cur.k=='s1'&&!done){
   if(a.value!==fixq(a.value))a.value=fixq(a.value);
@@ -396,9 +410,55 @@ function fin1(){
  $('#fb').innerHTML=`<div class="fb"><b class="d hd"><span class="mk">✓</span>${cur.mis?cur.mis+' slip'+(cur.mis>1?'s':''):'Perfect'}</b></div>`;
  ui(true);
 }
+const nk=w=>norm(w).join(' ');
+function lcsMask(e,t){const a=[...e.toLowerCase()],b=[...t.toLowerCase()],L=[...Array(a.length+1)].map(()=>Array(b.length+1).fill(0));
+ for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)L[i][j]=a[i]==b[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+ const m=Array(a.length).fill(false);let i=0,j=0;
+ while(i<a.length&&j<b.length){if(a[i]==b[j]){m[i]=true;i++;j++}else if(L[i+1][j]>=L[i][j+1])i++;else j++}
+ return m}
+function dh(e,t){const m=lcsMask(e,t);return [...e].map((c,k)=>m[k]?esc(c):`<u class="dl">${esc(c)}</u>`).join('')}
+function badList(){return cur.sl.map((x,i)=>x.ok?-1:i).filter(i=>i>=0)}
+function revealBanner(){const ex=cur.exp.trim().split(/\s+/);$('#top').innerHTML='<div class="rev">'+ex.map((w,i)=>cur.sl[i].ok?esc(w):dh(w,cur.sl[i].v)).join(' ')+'</div>'}
+function msg(h,p,bad){$('#fb').innerHTML=`<div class="fb${bad?' x':''}"><b class="d hd"><span class="mk">${bad?'✗':'✓'}</span>${h}</b>${p?`<p>${p}</p>`:''}</div>`}
+function selSlot(i){
+ if(!cur.sl[i]||cur.sl[i].ok)return;cur.sel=i;const a=$('#ans');a.value=cur.sl[i].v;paint();a.focus();
+ if(a.setSelectionRange){const n=a.value.length;a.setSelectionRange(n,n)}
+}
+function selStep(){const b=badList();if(!b.length)return;const nx=b.find(i=>i>cur.sel);selSlot(nx!=null?nx:b[0])}
+function startFix(typed,rv,title){
+ const ex=cur.exp.trim().split(/\s+/),ty=typed.trim().split(/\s+/).filter(Boolean),a=align(ex.map(nk),ty.map(nk)),n=ex.length,sl=[];
+ let i=0,j=0;
+ while(i<n){
+  if(a.mt[i]>=0){sl.push({v:ty[a.mt[i]],ok:true});j=a.mt[i]+1;i++;continue}
+  let i2=i;while(i2<n&&a.mt[i2]<0)i2++;
+  const j2=i2<n?a.mt[i2]:ty.length,gu=ty.slice(j,j2);
+  for(let k=i;k<i2;k++)sl.push({v:gu[k-i]||'',ok:false,an:'sh'});
+  j=j2;i=i2;
+ }
+ cur.sl=sl;cur.fix=true;cur.att=rv?3:1;cur.rv=!!rv;
+ const b=badList();
+ if(!b.length){done=true;msg('Almost','You added an extra word. Press Next.',1);return ui(false)}
+ const c=$('#qc');c.classList.remove('ok','no');void c.offsetWidth;c.classList.add('no');
+ if(rv){revealBanner();msg(title||'Here is the answer','The red letters show what to fix. Tap a word, type it correctly, then press Check.',1)}
+ else msg(b.length+(b.length>1?' words need':' word needs')+' fixing','Tap a red word, fix it, then press Check. Attempt 1 of 3.',1);
+ $('#chk').textContent='Check';selSlot(b[0]);
+}
+function checkFix(){
+ const ex=cur.exp.trim().split(/\s+/);
+ cur.sl.forEach((x,i)=>{if(!x.ok){x.ok=nk(x.v)==nk(ex[i]);x.dirty=false;x.an=x.ok?'pop':'sh'}});
+ const b=badList();
+ if(!b.length){$('#top').innerHTML='';msg('Fixed','Nice. That sentence is done.');done=true;return ui(true)}
+ cur.att++;const c=$('#qc');c.classList.remove('ok','no');void c.offsetWidth;c.classList.add('no');
+ const st=b.length+(b.length>1?' words are':' word is')+' still wrong';
+ if(cur.att>=3&&!cur.rv){cur.rv=true;revealBanner();msg('Here is the answer','The red letters show what to fix. Tap a word, type it correctly, then press Check.',1)}
+ else if(cur.rv){revealBanner();msg(st,'Compare with the sentence above.',1)}
+ else msg(st,'Attempt '+cur.att+' of 3.',1);
+ selSlot(b[0]);
+}
 function check(){
  const A=$('#ans'),typed=A.value.trim();
- if(cur.k=='s1'||!typed)return;
+ if(cur.k=='sent'&&cur.fix&&!done)return checkFix();
+  if(cur.k=='s1'||!typed)return;
  const E=norm(cur.exp),U=norm(typed),a=align(E,U),ok=!a.errs.length,warn=[];
  if(ok&&cur.k=='sent'&&!cur.fix){
   if(letters(typed)!==letters(cur.exp))warn.push('Capital letters differ from the original.');
@@ -412,16 +472,13 @@ function check(){
   done=true;return ui(true);
  }
  $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Not quite</b><p>You wrote: ${you}</p><p>Correct: ${fix}</p><p><small>${a.errs.map(e=>e.k+(e.exp?': '+esc(e.exp):'')+(e.tgt?'':' (other word)')).join(' · ')}</small></p>${cur.k=='sent'?'<p>Now type the whole sentence correctly.</p>':'<p><small>This word will come back soon.</small></p>'}</div>`;
- if(cur.k=='sent'){
-  cur.fix=true;$('#top').innerHTML=`<div class="rev">${esc(cur.exp)}</div>`;
-  const c=$('#qc');c.classList.remove('ok','no');void c.offsetWidth;c.classList.add('no');
-  A.value='';return paint();
- }
+ if(cur.k=='sent')return startFix(typed,false);
  requeue();done=true;ui(false);
 }
 $('#ans').oninput=onInput;
 $('#chk').onclick=()=>done?(qi++,next()):check();
 $('#ans').onkeydown=e=>{keyed();if(e.key=='Enter'&&!e.shiftKey){e.preventDefault();done?(qi++,next()):check()}};
+$('#ans').addEventListener('click',e=>{if(!cur||cur.k!='sent'||!cur.fix||done||!document.elementsFromPoint)return;const t=document.elementsFromPoint(e.clientX,e.clientY).find(x=>x.dataset&&x.dataset.i!==undefined);if(t)selSlot(+t.dataset.i)});
 $('#eye').onclick=()=>{cur.eye=!cur.eye;paint();$('#ans').focus()};
 document.addEventListener('keydown',()=>{if(paused)resume()});$('#idle').onclick=resume;
 const OPT={total:[7,8,9,10,11,12].map(v=>[v,''+v]),word:[7,10,15,20].map(v=>[v,''+v]),sent:[20,30,45,60].map(v=>[v,''+v]),whole:[[false,'Off'],[true,'On']],mp:[[0,'∞'],[1,'1'],[2,'2'],[3,'3'],[5,'5']]};
