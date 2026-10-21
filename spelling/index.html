@@ -228,7 +228,7 @@ function say(t){
  if(speechSynthesis.speaking||speechSynthesis.pending){speechSynthesis.cancel();setTimeout(go,80)}else go();
 }
 function plays(){const l=cur&&cur.lim,lock=!!(l&&!done&&played>=l);$('#pl').textContent=l&&!done?`${Math.max(l-played,0)} of ${l} plays left`:'';$('#spk').disabled=lock}
-function hear(){if(!cur||!('speechSynthesis' in window))return;if(cur.lim&&!done&&played>=cur.lim)return;played++;say(cur.say);plays()}
+function hear(){if(!cur||NOPLAY||!('speechSynthesis' in window))return;if(cur.lim&&!done&&played>=cur.lim)return;played++;say(cur.say);plays()}
 $('#spk').onclick=()=>{hear();$('#ans').focus()};
 
 /* ---------- checking ---------- */
@@ -252,8 +252,9 @@ function align(E,U){
  flush();return{errs,bad,miss,mt}
 }
 /* ---------- quiz flow ---------- */
-let items=[],R=0,Q=[],qi=0,cur=null,done=false,log=[],title='',played=0,weak=new Set();
+let items=[],R=0,Q=[],qi=0,cur=null,done=false,log=[],title='',played=0,weak=new Set(),NOPLAY=false,SESS=null;
 let RUN={total:10,word:15,sent:30,whole:false,mp:0},tot=600,wt=15,tStarted=false,paused=false,lastKey=0,tick=null,tlast=0;
+const IDLE0=$('#idle').innerHTML;
 const CFG=Object.assign({total:10,word:15,sent:30,whole:false,mp:0},LS('sc_cfg')||{});
 const fmt=x=>{x=Math.max(0,Math.ceil(x));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
 function tm(){
@@ -262,7 +263,7 @@ function tm(){
  b.style.width=(f*100)+'%';b.style.background=f>.5?'#4aa8ff':f>.25?'#ffd45a':'#ff4d5e';
 }
 function stopT(){clearInterval(tick);tStarted=false;paused=false;$('#idle').hidden=true}
-function resume(){if(!paused)return;paused=false;tlast=lastKey=Date.now();$('#idle').hidden=true;$('#ans').focus()}
+function resume(){if(!paused)return;paused=false;tlast=lastKey=Date.now();$('#idle').hidden=true;$('#idle').innerHTML=IDLE0;$('#ans').focus();if(cur&&cur.needPlay){cur.needPlay=false;hear()}}
 function keyed(){
  lastKey=Date.now();
  if(paused)resume();
@@ -328,12 +329,12 @@ function build(data){
   if(!x.s1||!x.s2||!x.s3)throw 'The item "'+x.word+'" needs s1, s2 and s3 sentences (new format, see the prompt).';
   return{w:String(x.word).trim(),lim:parseInt(x.plays)||MP,s:{s1:parse(x.s1,x.word,true),s2:parse(x.s2,x.word),s2b:x.s2b?parse(x.s2b,x.word):null,s3:parse(x.s3,x.word)}}});
  if(!items.length)throw 'No valid items.';
- title=data.title||'Quiz';log=[];weak=new Set();
+ title=data.title||'Quiz';SESS=data;log=[];weak=new Set();
  $('#setup').classList.add('hide');$('#report').classList.add('hide');$('#quiz').classList.remove('hide');
  $('#gear').hidden=true;stopT();tot=RUN.total*60;startRound(1);next();
 }
-const wTask=x=>({k:'word',w:x.w,exp:x.w,say:x.w,lim:x.lim});
-const sTask=(x,key,k)=>{const p=x.s[key],whole=k=='s1'&&RUN.whole;return{k,w:x.w,exp:p.full,segs:(whole&&p.segs.map(y=>y.s).join('')!==p.full)?[{t:false,s:p.full}]:p.segs,T:whole?p.full:p.T,whole,say:p.full,lim:x.lim,tg:new Set(norm(p.T))}};
+const wTask=x=>({k:'word',ix:items.indexOf(x),w:x.w,exp:x.w,say:x.w,lim:x.lim});
+const sTask=(x,key,k)=>{const p=x.s[key],whole=k=='s1'&&RUN.whole;return{k,ix:items.indexOf(x),key,w:x.w,exp:p.full,segs:(whole&&p.segs.map(y=>y.s).join('')!==p.full)?[{t:false,s:p.full}]:p.segs,T:whole?p.full:p.T,whole,say:p.full,lim:x.lim,tg:new Set(norm(p.T))}};
 function startRound(r){
  R=r;qi=0;
  if(r==1)Q=shuf(items).flatMap(x=>{const a=wTask(x),b=sTask(x,'s1','s1');a.pair=b;return[a,b]});
@@ -342,7 +343,7 @@ function startRound(r){
  else Q=shuf(items).map(x=>sTask(x,'s3','sent'));
 }
 const LAB={word:'Spell the word',s1:'Fill the missing words',sent:'Write the sentence'};
-function next(){
+function next(np){
  if(qi>=Q.length){if(R>=3)return finish();startRound(R+1)}
  cur=Q[qi];done=false;played=0;Object.assign(cur,{mis:0,prev:'',fix:false,rev:false,flash:false,wst:false,wm:{},rws:new Set(),eye:cur.k=='word'&&R==1});if(cur.k=='s1'){let w=0;cur.wid=[...fixq(cur.T)].map(c=>{const r=w;if(c==' ')w++;return r})}
  $('#kind').textContent=`Round ${R} · ${LAB[cur.k]}`;
@@ -350,7 +351,7 @@ function next(){
  $('#eye').hidden=!((cur.k=='word'&&R==1)||cur.k=='s1');$('#chk').hidden=cur.k=='s1';
  $('#top').innerHTML='';$('#fb').innerHTML='';$('#chk').textContent='Check';$('#qc').classList.remove('ok','no');
  const a=$('#ans');a.value='';a.readOnly=false;a.className='';
- paused=false;$('#idle').hidden=true;wt=cur.k=='word'?RUN.word:RUN.sent;tm();paint();plays();hear();a.focus();
+ paused=false;$('#idle').hidden=true;wt=cur.k=='word'?RUN.word:RUN.sent;tm();paint();plays();if(np)cur.needPlay=true;else hear();a.focus();save();
 }
 function chars(exp,v,ghost,act){
  let h='',w='';const n=Math.max(exp.length,v.length);
@@ -376,7 +377,7 @@ function paint(){
 function ui(ok){
  const A=$('#ans');A.readOnly=true;A.className=ok?'ok':'no';
  const c=$('#qc');c.classList.remove('ok','no');void c.offsetWidth;c.classList.add(ok?'ok':'no');
- $('#chk').hidden=false;$('#chk').textContent='Next';paint();plays();
+ $('#chk').hidden=false;$('#chk').textContent='Next';paint();plays();save();
 }
 function onInput(){
  keyed();const a=$('#ans');
@@ -487,7 +488,7 @@ if(CFG.word===10)CFG.word=15;
 function drawCfg(){document.querySelectorAll('#cfg .chips').forEach(c=>{const k=c.dataset.k;c.innerHTML=OPT[k].map(([v,l])=>`<button class="chip${CFG[k]===v?' on':''}" data-v="${v}">${l}</button>`).join('')})}
 $('#cfg').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const k=b.parentNode.dataset.k,v=b.dataset.v;CFG[k]=k=='whole'?v=='true':+v;LS('sc_cfg',CFG);drawCfg()};
 $('#gear').onclick=()=>{drawCfg();$('#cfg').showModal()};$('#cfgx').onclick=()=>$('#cfg').close();
-$('#quit').onclick=()=>{if(confirm('Quit this quiz? Progress is not saved.')){if('speechSynthesis' in window)speechSynthesis.cancel();stopT();$('#gear').hidden=false;cur=null;done=false;$('#quiz').classList.add('hide');$('#setup').classList.remove('hide');hist()}};
+$('#quit').onclick=()=>{if(confirm('Quit this quiz? Progress is not saved.')){if('speechSynthesis' in window)speechSynthesis.cancel();stopT();LS('sc_sess',null);$('#gear').hidden=false;cur=null;done=false;$('#quiz').classList.add('hide');$('#setup').classList.remove('hide');hist()}};
 const noPaste=e=>{e.preventDefault();const l=$('#pl');l.textContent='Paste is disabled. Type it yourself.';setTimeout(plays,1600)};
 ['paste','drop'].forEach(t=>$('#ans').addEventListener(t,noPaste));
 $('#ans').addEventListener('beforeinput',e=>{if(/^insertFrom(Paste|Drop|Yank)/.test(e.inputType))noPaste(e)});
@@ -499,7 +500,7 @@ function tally(L){
  return{kinds:top(kinds),pairs:top(pairs),weak:top(wk)}
 }
 function finish(){
- if('speechSynthesis' in window)speechSynthesis.cancel();stopT();done=false;cur=null;
+ if('speechSynthesis' in window)speechSynthesis.cancel();stopT();LS('sc_sess',null);done=false;cur=null;
  const first=log.filter(r=>!r.retry),right=first.filter(r=>r.ok).length,acc=Math.round(right/Math.max(first.length,1)*100);
  const by=[1,2,3].map(r=>{const f=first.filter(x=>x.r==r);return[r,f.filter(x=>x.ok).length,f.length]}).filter(x=>x[2]);
  const tu=tot<=0,T=tally(first),oth={};
@@ -558,6 +559,31 @@ window.addEventListener('appinstalled',()=>{$('#inst').hidden=true});
 $('#inst').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('#inst').hidden=true};
 if(/iPhone|iPad/.test(navigator.userAgent||'')&&!navigator.standalone)$('#ioshint').hidden=false;
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* ---------- keep the quiz safe if the page reloads ---------- */
+const desc=t=>({k:t.k,i:t.ix,key:t.key,retry:t.retry||0,pair:!!(t.pair&&Q[Q.indexOf(t)+1]===t.pair)});
+function save(){
+ try{
+  if(!cur||!SESS)return;
+  LS('sc_sess',{v:1,t:Date.now(),data:SESS,R,qi:done?qi+1:qi,Q:Q.map(desc),log,weak:[...weak],tot,RUN,title,
+   typed:done?'':(cur.k=='s1'?cur.prev:(cur.fix?'':$('#ans').value))});
+ }catch(e){}
+}
+function restore(s){
+ NOPLAY=true;try{build(s.data)}finally{NOPLAY=false}
+ RUN=s.RUN;tot=s.tot;log=s.log||[];weak=new Set(s.weak||[]);title=s.title||title;R=s.R;
+ const T=s.Q.map(d=>{const x=items[d.i];if(!x)return null;const t=d.k=='word'?wTask(x):sTask(x,d.key,d.k);if(d.retry)t.retry=d.retry;return t});
+ s.Q.forEach((d,i)=>{if(d.pair&&T[i]&&T[i+1])T[i].pair=T[i+1]});
+ Q=T.filter(Boolean);qi=Math.min(s.qi,Q.length);
+ NOPLAY=true;try{next(true)}finally{NOPLAY=false}
+ if(cur){
+  if(s.typed){$('#ans').value=s.typed;if(cur.k=='s1')cur.prev=s.typed;paint()}
+  paused=true;$('#idle').innerHTML='<div>Quiz restored<br><small>Tap or press any key to continue</small></div>';$('#idle').hidden=false;
+ }
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+window.addEventListener('pagehide',save);window.addEventListener('beforeunload',save);
+try{const ss=LS('sc_sess');if(ss&&ss.v==1&&ss.data&&Date.now()-ss.t<3*864e5)restore(ss);else if(ss)LS('sc_sess',null)}
+catch(e){LS('sc_sess',null);stopT();cur=null;$('#quiz').classList.add('hide');$('#setup').classList.remove('hide');$('#gear').hidden=false}
 </script>
 </body>
 </html>
