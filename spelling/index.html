@@ -143,6 +143,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
 @keyframes ehit{25%{transform:scale(1.16) rotate(-9deg)}60%{transform:scale(.95) rotate(6deg)}}
 @media(prefers-reduced-motion:reduce){.car::after,.en b,.eye.hit{animation:none!important}}
 .eye.nonum .en{display:none}
+.mean{margin:10px 6px 0;text-align:center;opacity:.78;font-size:.95em;line-height:1.4}
 </style>
 </head>
 <body><main>
@@ -192,6 +193,7 @@ dialog::backdrop{background:rgba(0,0,0,.7)}
   <div id="top"></div>
   <div class="wrap"><div id="prompt" class="cz"></div>
   <textarea id="ans" rows="1" wrap="off" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type your answer"></textarea></div>
+  <div id="mean" class="mean" hidden></div>
   <div class="act"><small class="hint">Enter to check · Enter again for next</small><button class="p" id="chk">Check</button></div>
   <div id="fb"></div>
  </div>
@@ -216,16 +218,16 @@ const qt=s=>s.replace(/[’‘]/g,"'");
 const norm=s=>qt(s.toLowerCase()).replace(/[^\p{L}\p{N}'\s-]/gu," ").split(/\s+/).map(w=>w.replace(/^['-]+|['-]+$/g,'')).filter(Boolean);
 const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
 const PROMPT=`Make a spelling dictation quiz from the words, idioms, phrasal verbs and collocations I studied today. Return ONLY valid JSON, no extra text:
-{"title":"Day …","items":[{"word":"…","s1":"…","s2":"…"}]}
-Rules: 2 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word or phrase in every sentence (never double asterisks; inflected forms are fine). Check that EVERY sentence has them before answering. s1: a clear sentence of 8-14 words. s2: a medium-level sentence of 12-22 words that makes real sense and uses the word naturally; it may also use other words or phrases from my list, and then mark each of them with asterisks too. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
+{"title":"Day …","items":[{"word":"…","meaning":"…","s1":"…","s2":"…"}]}
+Rules: 2 DIFFERENT natural sentences per word, none repeated anywhere. Put *asterisks* around the target word or phrase in every sentence (never double asterisks; inflected forms are fine). Check that EVERY sentence has them before answering. meaning: a very short, simple definition of the word in plain English (max 8 words), with no example. s1: a clear sentence of 8-14 words. s2: a medium-level sentence of 12-22 words that makes real sense and uses the word naturally; it may also use other words or phrases from my list, and then mark each of them with asterisks too. Only if I ask for a listening limit or for whole-sentence writing in round 1, also add "settings":{"max_plays":N,"sentence_mode":true} before "items".`;
 $('#prm').textContent=PROMPT;
 const copy=(t,b)=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove()}).then(()=>b.textContent='Copied');
 $('#cp').onclick=()=>copy(PROMPT,$('#cp'));
 const SAMPLE={title:"Sample",settings:{max_plays:3},items:[
-{word:"meticulous",s1:"She was *meticulous* about checking every detail.",s2:"The editor was so *meticulous* that she found errors in footnotes nobody else had read."},
-{word:"reluctant",s1:"He was *reluctant* to admit his mistake.",s2:"Many students are *reluctant* to speak in class, yet a patient teacher can *accommodate* their fears."},
-{word:"accommodate",s1:"The hotel can *accommodate* two hundred guests.",s2:"The new library was built to *accommodate* more readers, and some delay was *inevitable*."},
-{word:"inevitable",s1:"A delay was *inevitable* because of the storm.",s2:"When you learn a language, some mistakes are *inevitable*, but a *meticulous* learner tracks them."}]};
+{word:"meticulous",meaning:"very careful about small details",s1:"She was *meticulous* about checking every detail.",s2:"The editor was so *meticulous* that she found errors in footnotes nobody else had read."},
+{word:"reluctant",meaning:"not willing, and slow to agree",s1:"He was *reluctant* to admit his mistake.",s2:"Many students are *reluctant* to speak in class, yet a patient teacher can *accommodate* their fears."},
+{word:"accommodate",meaning:"to have enough space for",s1:"The hotel can *accommodate* two hundred guests.",s2:"The new library was built to *accommodate* more readers, and some delay was *inevitable*."},
+{word:"inevitable",meaning:"certain to happen; cannot be avoided",s1:"A delay was *inevitable* because of the storm.",s2:"When you learn a language, some mistakes are *inevitable*, but a *meticulous* learner tracks them."}]};
 
 /* ---------- voice ---------- */
 let voices=[],lastU=null;
@@ -309,7 +311,7 @@ function timeUp(){
  log.push({r:R,k:cur.k,w:cur.w,exp:cur.exp,got:typed||'(time up)',ok:false,retry:!!cur.retry,errs:[{k:'timeout',exp:cur.exp,got:typed||'—',tgt:true}]});
  if(R==1)weak.add(cur.w);
  if(cur.k=='word'){
-  $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Time is up</b><p>Correct: <span class="g">${esc(cur.exp)}</span></p><p><small>This word will come back soon.</small></p></div>`;
+  $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Time is up</b><p>Correct: <span class="g">${esc(cur.exp)}</span></p>${R<3?'<p><small>This word will come back soon.</small></p>':''}</div>`;
   requeue();done=true;ui(false);return;
  }
  wt=0;tm();if(cur.k=='sent'){if((cur.retry||0)<3)requeue();return startFix(typed,true,'Time is up')}cur.fix=true;
@@ -318,6 +320,7 @@ function timeUp(){
  $('#top').innerHTML=`<div class="rev">${esc(cur.exp)}</div>`;$('#ans').value='';paint();
 }
 function requeue(){
+ if(R>=3)return;
  if(cur.pair&&Q[qi+1]===cur.pair)Q.splice(qi+1,1);
  const wc={...cur,retry:(cur.retry||0)+1},pc=cur.pair&&{...cur.pair};if(pc)wc.pair=pc;
  const gap=2+Math.floor(Math.random()*3);
@@ -353,7 +356,7 @@ function build(data){
  const MP=Math.max(0,parseInt(RUN.mp)||0);
  items=data.items.filter(x=>x&&x.word).map(x=>{
   if(!x.s1||!x.s2)throw 'The item "'+x.word+'" needs s1 and s2 sentences (new format, see the prompt).';
-  return{w:String(x.word).trim(),lim:parseInt(x.plays)||MP,s:{s1:parse(x.s1,x.word,true),s2:parse(x.s2,x.word),s2b:x.s2b?parse(x.s2b,x.word):null,s3:x.s3?parse(x.s3,x.word):null}}});
+  return{w:String(x.word).trim(),mean:String(x.meaning||x.mean||'').trim(),lim:parseInt(x.plays)||MP,s:{s1:parse(x.s1,x.word,true),s2:parse(x.s2,x.word),s2b:x.s2b?parse(x.s2b,x.word):null,s3:x.s3?parse(x.s3,x.word):null}}});
  if(!items.length)throw 'No valid items.';
  title=data.title||'Quiz';SESS=data;log=[];weak=new Set();
  $('#setup').classList.add('hide');$('#report').classList.add('hide');$('#quiz').classList.remove('hide');
@@ -390,23 +393,24 @@ function sync(){
  if(!cur||done||!(cur.k=='word'||cur.k=='sent'))return;
  const a=$('#ans');if(a.selectionStart!==cur.cp||a.selectionEnd!==cur.ce)paint();
 }
-const wTask=x=>({k:'word',ix:items.indexOf(x),w:x.w,exp:x.w,say:x.w,lim:x.lim});
+const wTask=x=>({k:'word',ix:items.indexOf(x),w:x.w,exp:x.w,say:x.w,mean:x.mean,lim:x.lim});
 const sTask=(x,key,k)=>{const p=x.s[key],whole=k=='s1'&&RUN.whole;return{k,ix:items.indexOf(x),key,w:x.w,exp:p.full,segs:(whole&&p.segs.map(y=>y.s).join('')!==p.full)?[{t:false,s:p.full}]:p.segs,T:whole?p.full:p.T,whole,say:p.full,lim:x.lim,tg:new Set(norm(p.T)),tw:tgIdx(p.segs)}};
 function startRound(r){
  R=r;qi=0;
  if(r==1)Q=shuf(items).flatMap(x=>{const a=wTask(x),b=sTask(x,'s1','s1');a.pair=b;return[a,b]});
+ else if(r==3)Q=shuf(items.filter(x=>weak.has(x.w))).map(x=>({...wTask(x),retry:1}));
  else Q=shuf(items).map(x=>sTask(x,'s2','sent'));
 }
 const LAB={word:'Spell the word',s1:'Fill the missing words',sent:'Write the sentence'};
 function next(np){
- if(qi>=Q.length){if(R>=2)return finish();startRound(R+1)}
- cur=Q[qi];done=false;played=0;Object.assign(cur,{mis:0,prev:'',fix:false,rev:false,flash:false,wst:false,lg:false,rpAt:0,cp:-1,eye:cur.k=='word'&&R==1});eyeN();
- $('#kind').textContent=`Round ${R} · ${LAB[cur.k]}`;
+ if(qi>=Q.length){if(R>=3||(R==2&&!weak.size))return finish();startRound(R+1)}
+ cur=Q[qi];done=false;played=0;Object.assign(cur,{mis:0,prev:'',fix:false,rev:false,flash:false,wst:false,lg:false,rpAt:0,mAt:0,cp:-1,eye:cur.k=='word'&&R==1});eyeN();
+ $('#kind').textContent=`${R==3?'Final check':'Round '+R} · ${LAB[cur.k]}`;
  $('#cnt').textContent=`${qi+1} / ${Q.length}`;$('#pb').style.width=(qi/Q.length*100)+'%';
  $('#eye').hidden=!((cur.k=='word'&&R==1)||cur.k=='s1');$('#chk').hidden=cur.k=='s1';
  $('#top').innerHTML='';$('#fb').innerHTML='';$('#chk').textContent='Check';$('#qc').classList.remove('ok','no');
  const a=$('#ans');a.value='';a.readOnly=false;a.className='';
- paused=false;$('#idle').hidden=true;wt=cur.k=='word'?RUN.word:RUN.sent;tm();paint();plays();if(np)cur.needPlay=true;else hear();a.focus();save();
+ paused=false;$('#idle').hidden=true;wt=cur.k=='word'?RUN.word:Math.max(RUN.sent,Math.ceil(cur.exp.split(/\s+/).length*2.2));tm();paint();plays();if(np)cur.needPlay=true;else hear();a.focus();save();
 }
 function chars(exp,v,ghost,act){
  let h='',w='';const n=Math.max(exp.length,v.length);
@@ -419,7 +423,7 @@ function paint(){
  if(!cur)return;
  const a=$('#ans'),v=a.value,g=cur.eye||cur.rev,cs=a.selectionStart,ce=a.selectionEnd;let h;
  cur.cp=cs;cur.ce=ce;
- $('#eye').classList.toggle('on',!!g);$('#eye').classList.toggle('nonum',cur.k=='word');$('#eye').setAttribute('aria-pressed',String(!!g));eyeN();
+ $('#eye').classList.toggle('on',!!g);$('#eye').classList.toggle('nonum',cur.k=='word');{const m=$('#mean');m.hidden=!(cur.k=='word'&&R==1&&cur.mean);m.textContent=cur.mean||''}$('#eye').setAttribute('aria-pressed',String(!!g));eyeN();
  if(cur.k=='word')h=chars(cur.exp,v,g,cs);
  else if(cur.k=='s1'){let off=0;const W=cur.whole;
   h=cur.segs.map(x=>{if(!x.t&&!W)return esc(x.s);const rel=v.length-off,
@@ -451,10 +455,11 @@ function onInput(){
   const E=fixq(cur.T),v=a.value,p=cur.prev;let np=null;
   if(p.startsWith(v))np=v;else if(v.startsWith(p))np=accept(E,p,v.slice(p.length));
   if(np===null){
-   a.value=p;cur.mis++;cur.flash=true;
+   a.value=p;cur.flash=true;
    const c=$('#qc');c.classList.remove('ok','no');void c.offsetWidth;c.classList.add('no');setTimeout(()=>c.classList.remove('no'),450);
-   eyeN(true);again();
-   if(cur.mis>=MAXM&&!cur.rev){cur.rev=true;$('#top').innerHTML=`<div class="rev">${esc(cur.T)}</div>`}
+   const now=Date.now();
+   if(!(cur.eye||cur.rev)&&now-cur.mAt>=1200){cur.mAt=now;cur.mis++;eyeN(true);again();
+    if(cur.mis>=MAXM){cur.rev=true;$('#top').innerHTML=`<div class="rev">${esc(cur.T)}</div>`}}
   }else{a.value=cur.prev=np;cur.flash=false}
   if(a.value.length==E.length)return fin1();
  }
@@ -529,7 +534,7 @@ function check(){
   $('#fb').innerHTML=`<div class="fb"><b class="d hd"><span class="mk">✓</span>${cur.fix?'Fixed':'Correct'}</b>${warn.map(w=>`<div class="warn">${w}</div>`).join('')}</div>`;
   done=true;return ui(true);
  }
- $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Not quite</b><p>You wrote: ${you}</p><p>Correct: ${fix}</p><p><small>${a.errs.map(e=>e.k+(e.exp?': '+esc(e.exp):'')+(e.tgt?'':' (other word)')).join(' · ')}</small></p>${cur.k=='sent'?'<p>Now type the whole sentence correctly.</p>':'<p><small>This word will come back soon.</small></p>'}</div>`;
+ $('#fb').innerHTML=`<div class="fb x"><b class="d hd"><span class="mk">✗</span>Not quite</b><p>You wrote: ${you}</p><p>Correct: ${fix}</p><p><small>${a.errs.map(e=>e.k+(e.exp?': '+esc(e.exp):'')+(e.tgt?'':' (other word)')).join(' · ')}</small></p>${cur.k=='sent'?'<p>Now type the whole sentence correctly.</p>':(R<3?'<p><small>This word will come back soon.</small></p>':'')}</div>`;
  if(cur.k=='sent')return startFix(typed,false);
  requeue();again();done=true;ui(false);
 }
@@ -603,7 +608,7 @@ Please explain my patterns, then make a new quiz JSON (same format) that focuses
  const Rp=$('#report');Rp.classList.remove('hide');
  Rp.innerHTML=`<div class="card"><h2>Report</h2><div class="grid" style="margin-top:10px">
  <div class="st"><b>${acc}%</b>first-try accuracy</div><div class="st"><b>${right}/${first.length}</b>correct</div><div class="st"><b>${log.length-first.length}</b>retries</div></div>
- <p><small>${by.map(([r,a,n])=>`Round ${r}: ${a}/${n}`).join(' · ')}</small></p></div>
+ <p><small>${by.map(([r,a,n])=>`${r==3?'Final check':'Round '+r}: ${a}/${n}`).join(' · ')}</small></p></div>
  <div class="card"><h2>Mistakes</h2><table>${T.kinds.map(([k,n])=>`<tr><td>${esc(k)}</td><td>${n}</td></tr>`).join('')||'<tr><td>No mistakes. Clean run.</td></tr>'}</table>
  ${T.pairs.length?`<h2 style="margin-top:14px">Expected → you wrote</h2><table>${T.pairs.slice(0,10).map(([k,n])=>`<tr><td>${esc(k)}</td><td>${n>1?'×'+n:''}</td></tr>`).join('')}</table>`:''}
  ${O.length?`<h2 style="margin-top:14px">Outside your words</h2><table>${O.slice(0,8).map(([k,n])=>`<tr><td>${esc(k)}</td><td>${n>1?'×'+n:''}</td></tr>`).join('')}</table>`:''}</div>
