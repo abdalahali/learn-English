@@ -1805,8 +1805,7 @@ Status: Verified & Authenticated
           const s = d.extra.syns[0];
           synHtml =
             '<div style="margin-top:10px;">' +
-              '<span dir="auto" style="display:inline-block; padding:5px 14px; border-radius:10px; background:#E3EAE0; font-size:15.5px; line-height:1.4; color:' + cInk + '; word-break:break-word;">' +
-                '<span style="font-size:11px; font-weight:700; letter-spacing:1.3px; color:' + cGreen + '; margin-right:9px;">SYNONYM</span>' +
+              '<span dir="auto" style="display:inline-block; padding:5px 15px; border-radius:10px; background:#E3EAE0; font-size:16px; line-height:1.4; color:' + cInk + '; word-break:break-word;">' +
                 '<span style="font-weight:700; color:' + cGreen + ';">' + escapeHtml(s.w) + '</span>' +
                 (s.note ? '<span style="font-size:13.5px; font-style:italic; color:' + cInkSoft + ';"> &mdash; ' + escapeHtml(s.note) + '</span>' : '') +
               '</span>' +
@@ -1815,10 +1814,12 @@ Status: Verified & Authenticated
 
         return (
           '<div style="display:flex; align-items:flex-start; gap:18px; padding:19px 12px; ' + (i % 2 === 1 ? 'background:#F7F5EF;' : '') + ' border-bottom:1px solid ' + cStoneLight + ';">' +
+            '<div style="flex:0 0 calc(32% + 48px); min-width:0; align-self:center; display:flex; align-items:flex-start; gap:18px;">' +
             '<div style="flex:0 0 30px; font-family:\'Delius\', \'Comic Sans MS\', sans-serif; font-weight:600; font-size:17px; line-height:26px; color:' + cWine + '; opacity:0.75; text-align:right; font-variant-numeric:tabular-nums;">' + (i + 1) + '</div>' +
-            '<div style="flex:0 0 32%; min-width:0;">' +
+            '<div style="flex:1; min-width:0;">' +
               '<div class="pd-word" style="font-family:\'Delius\', \'Comic Sans MS\', sans-serif; font-weight:600; font-size:21px; line-height:1.25; color:' + cWine + ';">' + escapeHtml(d.word) + '</div>' +
               posHtml +
+            '</div>' +
             '</div>' +
             '<div style="flex:1; min-width:0;">' +
               meaningHtml +
