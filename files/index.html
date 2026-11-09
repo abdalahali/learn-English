@@ -58,7 +58,7 @@ textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(
 <script>
 const L={ol:["IELTS Online Tests","https://ieltsonlinetests.com/"],bbc:["BBC Learning English","https://www.bbc.co.uk/learningenglish/"],pr:["Pronounce","https://app.getpronounce.com/login"],jump:["Jumpinto","https://www.jumpinto.com/"],liz:["IELTS Liz","https://ieltsliz.com/"],wi:["Write & Improve","https://writeandimprove.com/workbooks#/wi-workbooks"],w9:["Writing9","https://writing9.com/draft"],eng:["Engnovate","https://engnovate.com/"],io:["IELTS.org","https://ielts.org/take-a-test/test-types/ielts-academic-test"],idp:["IDP free test","https://ielts.idp.com/prepare"],bc2:["British Council IELTS Ready","https://takeielts.britishcouncil.org/prepare/ielts-ready"]};
 const D=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const FO=["Week 1: one focus a day. Learn the strategy first, then practise it.","Week 2: two focuses a day. Build speed and accuracy.","Week 3: two focuses a day, all under real exam timing.","Week 4: full mocks. Build your exam stamina.","Buffer days: review your mistakes and polish your weak spots."].map(x=>x+" Listening, Reading, Writing and Speaking are in every day: the focus skill gets the most time, the others share the rest.");
+const FO=["Week 1: one focus a day. Learn the strategy first, then practise it.","Week 2: two focuses a day. Build speed and accuracy.","Week 3: two focuses a day, all under real exam timing.","Week 4: full mocks. Build your exam stamina.","Buffer days: review your mistakes and polish your weak spots."].map(x=>x+" Listening, Reading, Writing and Speaking are in every day, and Grammar joins from Week 2 Tuesday. The focus skill gets the most time, the others share the rest.");
 const Q=["Small steps every day add up to Band 7.","Consistency beats intensity. Show up today.","Every mistake you log is a mark you will not lose.","You do not need perfect. You need steady.","Focus for this block only. Nothing else.","Rest is part of the plan. Trust it.","Future you will thank you for today."];
 const PN=["Practise your hardest sounds, then say today's new words aloud.","Listen to a short clip, copy the stress and rhythm, then record and compare.","Read a paragraph aloud, record it, and fix one sound you missed."];
 const SK={
@@ -79,14 +79,14 @@ rest:["Rest and light review",[],"Light review of your error book only. Sleep we
 const MK=(n)=>["Full mock "+n,n==4?["idp","bc2"]:["eng"],"Listening 30 min, Reading 60 min, Writing 60 min, no pausing. Record Speaking and send it to your teacher."+(n==4?" Do it at the real exam hour.":"")];
 ["m1","m2","m3","m4"].forEach((k,i)=>SK[k]=MK(i+1));
 const P=[[["gr","gr"],["w1","w1"],["li","li"],["rd","rd"],["sp","sp"],["qt","rv"],["w2","w2"]],
-[["w1","li"],["rd","sp"],["w2","rd"],["li","sp"],["w1","sp"],["xl","ev"],["wk","rv"]],
-[["wf","li"],["rd","sp"],["li","rd"],["w2","sp"],["wk","li"],["m1","ev"],["ev","sp"]],
-[["m2","sp"],["ev","wk"],["m3"],["ev","sp"],["wk","vr"],["m4"],["rest"]],
+[["w1","li"],["rd","sp"],["w2","rd"],["gr"],["w1","sp"],["xl","ev"],["wk","rv"]],
+[["wf","li"],["rd","sp"],["li","rd"],["gr"],["wk","w2"],["m1","ev"],["ev","sp"]],
+[["m2","sp"],["ev","wk"],["m3"],["gr","ev"],["wk","vr"],["m4"],["rest"]],
 [["ev","wk"],["ev","wk"]]];
 const nd=w=>P[w].length,$=s=>document.querySelector(s),key=(w,d,i)=>w+"-"+d+"-"+i,fmt=m=>Math.floor(m/60)+"h "+(m%60)+"m";
 const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const SM={w1:"wr",w2:"wr",wf:"wr",li:"li",rd:"rd",sp:"sp"},CV={qt:["li","rd"],xl:["li","rd"],m1:"all",m2:"all",m3:"all",m4:"all"},SKL=["li","rd","wr","sp"];
-const SH={li:["Listening",["ol","jump","bbc"],"One timed section, then note each mistake and why it happened."],rd:["Reading",["ol","eng"],"One timed passage, then review the mistakes and collect vocabulary."],wr:["Writing",["wi","w9"],"A Task 1 paragraph or a Task 2 outline with an introduction. Check it against your error book."],sp:["Speaking",["liz"],"One Part 2 talk and a few Part 3 questions, recorded. Listen back for mistakes."]};
+const SM={w1:"wr",w2:"wr",wf:"wr",li:"li",rd:"rd",sp:"sp",gr:"gr"},CV={qt:["li","rd"],xl:["li","rd"],m1:"all",m2:"all",m3:"all",m4:"all"},SKL=["li","rd","wr","sp"],SKL5=[...SKL,"gr"],GFROM=9;
+const SH={gr:["Grammar",[],"One grammar point from your error book: learn the rule, then write 3 sentences of your own."],li:["Listening",["ol","jump","bbc"],"One timed section, then note each mistake and why it happened."],rd:["Reading",["ol","eng"],"One timed passage, then review the mistakes and collect vocabulary."],wr:["Writing",["wi","w9"],"A Task 1 paragraph or a Task 2 outline with an introduction. Check it against your error book."],sp:["Speaking",["liz"],"One Part 2 talk and a few Part 3 questions, recorded. Listen back for mistakes."]};
 function split(p,k){const b=Math.floor(p/k/5)*5,r=(p-b*k)/5,a=[];for(let i=0;i<k;i++)a.push(b+(i>=k-r?5:0));return a}
 function blocks(w,d){const it=P[w][d],u=[...new Set(it)],n=u.length,rest=it[0]=="rest",gram=it[0]=="gr",cov=new Set(),
 B=[["am","Vocabulary and mistakes",45,"Your words and your error book. Review yesterday's mistakes first.",[],"Morning"],["pr","Pronunciation",15,PN[d%3],["pr","bbc"]]];
@@ -95,8 +95,8 @@ it.forEach((c,i)=>{const s=SK[c],two=it.length==2&&it[0]==it[1];let t=s[0],nt=s[
 if(two){t+=i?": practice":": strategy";nt=i?s[2]:s[3]}
 B.push(["f"+i,t,m,nt,s[1],i?"":"Focus"])});
 B.push(["rv","Review today's mistakes",15,"Your mistakes are what build your score. Write each one once with its correction and why it happened.",[]]);
-const oth=rest?[]:gram?SKL:SKL.filter(x=>!cov.has(x));
-if(oth.length){const dist=split(gram||n==1?110:75,oth.length);oth.forEach((x,i)=>B.push(["s"+x,SH[x][0]+": short",dist[i],SH[x][2],SH[x][1],i?"":"Every day"]))}
+const oth=rest?[]:gram?SKL:(w*7+d>=GFROM?SKL5:SKL).filter(x=>!cov.has(x));
+if(oth.length){const dist=split(oth.length==1?30:n==1?110:75,oth.length);oth.forEach((x,i)=>B.push(["s"+x,SH[x][0]+": short",dist[i],SH[x][2],SH[x][1],i?"":"Every day"]))}
 B.push(["rv2","Review today's mistakes: final round",15,"Last pass of the day. Write each mistake once with its correction and why it happened.",[],oth.length?"":"Every day"]);
 B.push(["pm","Vocabulary and mistakes",45,"Review the day's new words and mistakes again.",[],"Evening"]);return B}
 let S={w:0,d:0,v:"plan",f:"all",done:{},nt:{},wn:{},wstat:{},ex:"",st:"2026-11-01"};
