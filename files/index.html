@@ -56,7 +56,7 @@ textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body><main id="app"></main>
 <script>
-const L={ol:["IELTS Online Tests","https://ieltsonlinetests.com/"],bbc:["BBC Learning English","https://www.bbc.co.uk/learningenglish/"],pr:["Pronounce","https://app.getpronounce.com/login"],jump:["Jumpinto","https://www.jumpinto.com/"],liz:["IELTS Liz","https://ieltsliz.com/"],wi:["Write & Improve","https://writeandimprove.com/workbooks#/wi-workbooks"],w9:["Writing9","https://writing9.com/draft"],eng:["Engnovate","https://engnovate.com/"],io:["IELTS.org","https://ielts.org/take-a-test/test-types/ielts-academic-test"],idp:["IDP free test","https://ielts.idp.com/prepare"],bc2:["British Council IELTS Ready","https://takeielts.britishcouncil.org/prepare/ielts-ready"]};
+const L={ol:["IELTS Online Tests","https://ieltsonlinetests.com/"],cg:["Cambridge Grammar","https://dictionary.cambridge.org/grammar/british-grammar/"],bcg:["British Council Grammar","https://learnenglish.britishcouncil.org/grammar"],bbc:["BBC Learning English","https://www.bbc.co.uk/learningenglish/"],pr:["Pronounce","https://app.getpronounce.com/login"],jump:["Jumpinto","https://www.jumpinto.com/"],liz:["IELTS Liz","https://ieltsliz.com/"],wi:["Write & Improve","https://writeandimprove.com/workbooks#/wi-workbooks"],w9:["Writing9","https://writing9.com/draft"],eng:["Engnovate","https://engnovate.com/"],io:["IELTS.org","https://ielts.org/take-a-test/test-types/ielts-academic-test"],idp:["IDP free test","https://ielts.idp.com/prepare"],bc2:["British Council IELTS Ready","https://takeielts.britishcouncil.org/prepare/ielts-ready"]};
 const D=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const FO=["Week 1: one focus a day. Learn the strategy first, then practise it.","Week 2: two focuses a day. Build speed and accuracy.","Week 3: two focuses a day, all under real exam timing.","Week 4: full mocks. Build your exam stamina.","Buffer days: review your mistakes and polish your weak spots."].map(x=>x+" Listening, Reading, Writing and Speaking are in every day, and Grammar joins from Week 2 Tuesday. The focus skill gets the most time, the others share the rest.");
 const Q=["Small steps every day add up to Band 7.","Consistency beats intensity. Show up today.","Every mistake you log is a mark you will not lose.","You do not need perfect. You need steady.","Focus for this block only. Nothing else.","Rest is part of the plan. Trust it.","Future you will thank you for today."];
@@ -69,7 +69,7 @@ li:["Listening",["ol","jump","bbc"],"One timed section, then review every mistak
 rd:["Reading",["ol","eng"],"One timed passage (20 min), then review every mistake and collect vocabulary.","Learn the question types: skim, scan, and read True, False and Not Given carefully."],
 sp:["Speaking",["liz"],"Parts 1, 2 and 3 with a timer, recorded. Listen back and note mistakes.","Learn the three parts and how to extend answers. Record one full test."],
 wk:["Your weakest skill",["ol","liz"],"Pick the lowest score from the last test and drill its hardest question type."],
-gr:["Grammar only",[],"Rules and exercises for tenses, sentence structure and your grammar mistakes. Write 5 sentences of your own for each rule.","Learn the rules first: tenses and sentence structure, with examples."],
+gr:["Grammar",["cg","bcg","bbc"],"60 min plan. 1) 10 min: collect your grammar mistakes from the last 3 days in the error book and group them by type (tense, articles, prepositions, agreement, sentence structure, linking). 2) 15 min: take the biggest group, read the rule, copy 3 example sentences. 3) 20 min: do 10 exercises on that rule, mark them, and log every wrong answer. 4) 15 min: write 5 sentences of your own, then rewrite one paragraph from your last Writing or Speaking with the rule fixed.","Learn the rules first: tenses and sentence structure, with examples."],
 qt:["Short test",["ol"],"One Listening section and one Reading passage, timed. Then review every mistake."],
 rv:["Week review",[],"Read your error book for the week. Pick the two skills to push next week."],
 xl:["Full Listening and Reading",["ol","eng"],"Listening 30 min and Reading 60 min in real conditions. Use tests you have not done.",""],
@@ -79,19 +79,19 @@ rest:["Rest and light review",[],"Light review of your error book only. Sleep we
 const MK=(n)=>["Full mock "+n,n==4?["idp","bc2"]:["eng"],"Listening 30 min, Reading 60 min, Writing 60 min, no pausing. Record Speaking and send it to your teacher."+(n==4?" Do it at the real exam hour.":"")];
 ["m1","m2","m3","m4"].forEach((k,i)=>SK[k]=MK(i+1));
 const P=[[["gr","gr"],["w1","w1"],["li","li"],["rd","rd"],["sp","sp"],["qt","rv"],["w2","w2"]],
-[["w1","li"],["rd","sp"],["w2","rd"],["gr"],["w1","sp"],["xl","ev"],["wk","rv"]],
-[["wf","li"],["rd","sp"],["li","rd"],["gr"],["wk","w2"],["m1","ev"],["ev","sp"]],
+[["w1","li"],["rd","sp"],["w2","rd"],["gr","li"],["w1","sp"],["xl","ev"],["wk","rv"]],
+[["wf","li"],["rd","sp"],["li","rd"],["gr","w2"],["wk","li"],["m1","ev"],["ev","sp"]],
 [["m2","sp"],["ev","wk"],["m3"],["gr","ev"],["wk","vr"],["m4"],["rest"]],
 [["ev","wk"],["ev","wk"]]];
 const nd=w=>P[w].length,$=s=>document.querySelector(s),key=(w,d,i)=>w+"-"+d+"-"+i,fmt=m=>Math.floor(m/60)+"h "+(m%60)+"m";
 const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const SM={w1:"wr",w2:"wr",wf:"wr",li:"li",rd:"rd",sp:"sp",gr:"gr"},CV={qt:["li","rd"],xl:["li","rd"],m1:"all",m2:"all",m3:"all",m4:"all"},SKL=["li","rd","wr","sp"],SKL5=[...SKL,"gr"],GFROM=9;
-const SH={gr:["Grammar",[],"One grammar point from your error book: learn the rule, then write 3 sentences of your own."],li:["Listening",["ol","jump","bbc"],"One timed section, then note each mistake and why it happened."],rd:["Reading",["ol","eng"],"One timed passage, then review the mistakes and collect vocabulary."],wr:["Writing",["wi","w9"],"A Task 1 paragraph or a Task 2 outline with an introduction. Check it against your error book."],sp:["Speaking",["liz"],"One Part 2 talk and a few Part 3 questions, recorded. Listen back for mistakes."]};
+const SH={gr:["Grammar",[],"One grammar mistake from today's practice. Write its rule in one line, fix 3 sentences, then say it correctly in one spoken answer."],li:["Listening",["ol","jump","bbc"],"One timed section, then note each mistake and why it happened."],rd:["Reading",["ol","eng"],"One timed passage, then review the mistakes and collect vocabulary."],wr:["Writing",["wi","w9"],"A Task 1 paragraph or a Task 2 outline with an introduction. Check it against your error book."],sp:["Speaking",["liz"],"One Part 2 talk and a few Part 3 questions, recorded. Listen back for mistakes."]};
 function split(p,k){const b=Math.floor(p/k/5)*5,r=(p-b*k)/5,a=[];for(let i=0;i<k;i++)a.push(b+(i>=k-r?5:0));return a}
-function blocks(w,d){const it=P[w][d],u=[...new Set(it)],n=u.length,rest=it[0]=="rest",gram=it[0]=="gr",cov=new Set(),
+function blocks(w,d){const it=P[w][d],u=[...new Set(it)],n=u.length,rest=it[0]=="rest",gram=n==1&&it[0]=="gr",cov=new Set(),
 B=[["am","Vocabulary and mistakes",45,"Your words and your error book. Review yesterday's mistakes first.",[],"Morning"],["pr","Pronunciation",15,PN[d%3],["pr","bbc"]]];
 it.forEach(c=>{if(SM[c])cov.add(SM[c]);else if(CV[c]=="all")SKL.forEach(x=>cov.add(x));else if(CV[c])CV[c].forEach(x=>cov.add(x))});
-it.forEach((c,i)=>{const s=SK[c],two=it.length==2&&it[0]==it[1];let t=s[0],nt=s[3]&&w==0?s[3]:s[2],m=rest?60:two?75:n==1?150:90;
+it.forEach((c,i)=>{const s=SK[c],two=it.length==2&&it[0]==it[1];let t=s[0],nt=s[3]&&w==0?s[3]:s[2],m=rest?60:two?75:n==1?150:u.includes("gr")?(c=="gr"?60:120):90;
 if(two){t+=i?": practice":": strategy";nt=i?s[2]:s[3]}
 B.push(["f"+i,t,m,nt,s[1],i?"":"Focus"])});
 B.push(["rv","Review today's mistakes",15,"Your mistakes are what build your score. Write each one once with its correction and why it happened.",[]]);
